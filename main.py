@@ -23,6 +23,7 @@ packages = PackageLoader("data/packages.csv", PackageHashMap(61, 1, 1, .75)).get
 distances = DistanceMap("data/distances.csv")  # Load distance data from CSV
 routing = Routing(distances, packages, clock)  # Initialize routing system
 
+
 # Schedule special events for package availability and address updates
 
 clock.schedule_event(datetime(1900, 1, 1, 10, 20), routing.update_address, 9)  # Update package 9's address at 10:20 AM
