@@ -1,4 +1,4 @@
-Package ID,Address,City,State,Zip,Delivery,Weight KILO,Special Notes,
+Package ID,Address,City,State,Zip,Delivery,Weight,Special Notes,
 1,2496 S West Temple,Salt Lake City,UT,84115,10:30 AM,21,
 2,2530 S 500 E,Salt Lake City,UT,84106,EOD,44,
 3,233 Canyon Rd,Salt Lake City,UT,84103,EOD,2,Can only be on truck 2

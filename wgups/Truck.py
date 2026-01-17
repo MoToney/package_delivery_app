@@ -1,15 +1,10 @@
-from wgups.Package import Package, TruckCarrier
-from collections import deque
+from wgups.Package import Package
 from typing import List, Optional
 
-import csv
-from datetime import datetime, time, timedelta
+from datetime import timedelta
 
-from wgups.Routing import Routing
 from wgups.SimulationClock import SimulationClock
 from wgups.Package import TruckCarrier, PackageStatus
-from wgups.dataloader.PackageLoader import PackageLoader
-from wgups.datastore.PackageHashMap import PackageHashMap
 from wgups.datastore.DistanceMap import DistanceMap
 
 
