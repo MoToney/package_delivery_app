@@ -1,4 +1,4 @@
-from wgups.Package import Package
+from wgups.domain.package.Package import Package
 
 
 class PackageRepository:

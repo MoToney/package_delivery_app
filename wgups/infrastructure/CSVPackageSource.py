@@ -3,8 +3,8 @@ import re
 from datetime import datetime
 from typing import Optional, TextIO, Any
 
-from wgups.dataloader.NoteConstraints import NoteConstraints
-from wgups.dataloader.PackageRecord import PackageRecord
+from wgups.domain.package.NoteConstraints import NoteConstraints
+from wgups.domain.package.PackageRecord import PackageRecord
 from wgups.exceptions import InvalidInputError
 
 

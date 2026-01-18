@@ -2,9 +2,9 @@ from io import StringIO
 from datetime import datetime
 import pytest
 
-from wgups.dataloader.CSVPackageSource import CSVPackageSource
-from wgups.dataloader.PackageRecord import PackageRecord
-from wgups.dataloader.NoteConstraints import NoteConstraints
+from wgups.infrastructure.CSVPackageSource import CSVPackageSource
+from wgups.domain.package.PackageRecord import PackageRecord
+from wgups.domain.package.NoteConstraints import NoteConstraints
 from wgups.exceptions import InvalidInputError
 
 

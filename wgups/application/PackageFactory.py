@@ -1,7 +1,6 @@
-from wgups.Package import Package, PackageStatus
-from wgups.dataloader.CSVPackageSource import CSVPackageSource
-from wgups.dataloader.IDGenerator import IDGenerator
-from wgups.dataloader.PackageRecord import PackageRecord
+from wgups.domain.package.Package import Package, PackageStatus
+from wgups.domain.package.IDGenerator import IDGenerator
+from wgups.domain.package.PackageRecord import PackageRecord
 
 
 class PackageFactory:

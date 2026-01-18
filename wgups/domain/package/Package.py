@@ -73,7 +73,6 @@ class Package:
         available_time (datetime or None): The time the package is available to be delivered
         required_truck (int or None): The truck that is required to deliver the package
         wrong_address (bool): Whether the package has the wrong address
-        packages_at_same_address (Package or None): The package that is at the same address as the current package
         delivery_time (datetime or None): The time the package was delivered
         departure_time (datetime or None): The time the package was loaded onto a truck and left the hub
         truck_carrier (TruckCarrier): The truck that is associated with the package
@@ -124,8 +123,6 @@ class Package:
         self.available_time: Optional[datetime] = None # stores the time the package is available to be delivered
         self.required_truck: Optional[int] = None # stores the truck that is required to deliver the package, if any
         self.wrong_address: bool = False # stores whether the package has the wrong address, default is False
-
-        self.packages_at_same_address: Optional[list[int]] = None # stores the package that is at the same address as the current package, if any
 
         self.delivery_time: Optional[datetime] = None
         self.departure_time: Optional[datetime] = None
@@ -183,18 +180,6 @@ class Package:
         self.city = city
         self.state = state
         self.zip_code = zip_code
-
-    def get_siblings(self) -> list[int]:
-        """
-        Returns the packages that are at the same address as the current package
-        """
-        return self.packages_at_same_address
-
-    def set_packages_at_same_address(self, other_packages: list[int]) -> None:
-        """
-        Sets the packages that are at the same address as the current package
-        """
-        self.packages_at_same_address = other_packages
 
     def __str__(self):
         return (f"Package {self.package_id} | "

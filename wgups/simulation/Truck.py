@@ -1,11 +1,11 @@
-from wgups.Package import Package
+from wgups.domain.package.Package import Package
 from typing import List, Optional
 
 from datetime import timedelta
 
-from wgups.SimulationClock import SimulationClock
-from wgups.Package import TruckCarrier, PackageStatus
-from wgups.datastore.DistanceMap import DistanceMap
+from wgups.simulation.SimulationClock import SimulationClock
+from wgups.domain.package.Package import TruckCarrier, PackageStatus
+from wgups.domain.address.DistanceMap import DistanceMap
 
 
 class Truck:
