@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+from wgups.dataloader.NoteConstraints import NoteConstraints
+
 
 @dataclass
 class PackageRecord:
@@ -11,4 +13,4 @@ class PackageRecord:
     zipcode: str
     deadline: Optional[datetime]
     weight: float
-    note: str
+    constraints: NoteConstraints
