@@ -87,5 +87,3 @@ class CSVPackageSource:
         return NoteConstraints(required_truck, available_time, grouped_packages, wrong_address)
 
 
-csv_source = CSVPackageSource()
-print(CSVPackageSource().load_from_file("../../data/packages.csv"))

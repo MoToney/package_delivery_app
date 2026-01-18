@@ -6,7 +6,7 @@ from wgups.Package import Package
 
 from wgups.SimulationClock import SimulationClock
 from wgups.datastore.DistanceMap import DistanceMap
-from wgups.datastore.PackageHashMap import PackageHashMap
+from wgups.datastore.PackageRepository import PackageRepository
 
 
 class Routing:
@@ -15,11 +15,10 @@ class Routing:
 
     Attributes:
         distance_map (DistanceMap): The distance map of the packages
-        packages (PackageHashMap): The hash map of the packages
         clock (SimulationClock): The clock of the simulation
     """
 
-    def __init__(self, distance_map: DistanceMap, packages: PackageHashMap, clock:SimulationClock):
+    def __init__(self, distance_map: DistanceMap, packages: PackageRepository, clock:SimulationClock):
         """
         Initializes the Routing object
 

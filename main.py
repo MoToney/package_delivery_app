@@ -5,12 +5,12 @@ from wgups.Package import Package, PackageStatus
 from wgups.Routing import Routing
 from wgups.SimulationClock import SimulationClock
 from wgups.Truck import Truck
+from wgups.dataloader.CSVPackageSource import CSVPackageSource
+from wgups.dataloader.IDGenerator import IDGenerator
+from wgups.dataloader.PackageFactory import PackageFactory
 
-from wgups.dataloader.PackageLoader import PackageLoader
-from wgups.datastore.PackageHashMap import PackageHashMap
 from wgups.datastore.DistanceMap import DistanceMap
-
-# Maurice Toney Student ID:012549854
+from wgups.datastore.PackageManager import PackageManager
 
 # Configuration constants
 CAPACITY = 16  # Maximum number of packages each truck can carry
@@ -19,7 +19,15 @@ END_TIME = datetime(1900, 1, 1, 17, 0)  # Simulation end time (5:00 PM)
 
 # Initialize simulation components
 clock = SimulationClock(START_TIME)  # Initialize simulation clock
-packages = PackageLoader("data/packages.csv", PackageHashMap(61, 1, 1, .75)).get_map()  # Load packages from CSV
+csv_source = CSVPackageSource()
+records = (CSVPackageSource().load_from_file("data/packages.csv"))
+p_factory = PackageFactory(IDGenerator())
+package_manager = PackageManager(p_factory)
+for record in records:
+    package_manager.add(record)
+package_manager.update_groups()
+package_manager.update_shared_address()
+packages = package_manager.package_repository
 distances = DistanceMap("data/distances.csv")  # Load distance data from CSV
 routing = Routing(distances, packages, clock)  # Initialize routing system
 
@@ -40,6 +48,7 @@ truck1 = Truck(1, distances, clock)
 truck2 = Truck(2, distances, clock)
 
 # Schedule package loading events for both trucks
+
 clock.schedule_event(START_TIME, truck1.load_packages, route1)
 clock.schedule_event(START_TIME, truck2.load_packages, route2)
 
