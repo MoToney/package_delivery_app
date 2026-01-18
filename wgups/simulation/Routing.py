@@ -2,11 +2,13 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from wgups.Package import Package
+from wgups.domain.address.AddressIndex import AddressIndex
+from wgups.domain.grouping.GroupIndex import GroupIndex
+from wgups.domain.package.Package import Package
 
-from wgups.SimulationClock import SimulationClock
-from wgups.datastore.DistanceMap import DistanceMap
-from wgups.datastore.PackageRepository import PackageRepository
+from wgups.simulation.SimulationClock import SimulationClock
+from wgups.domain.address.DistanceMap import DistanceMap
+from wgups.application.PackageRepository import PackageRepository
 
 
 class Routing:
@@ -18,7 +20,8 @@ class Routing:
         clock (SimulationClock): The clock of the simulation
     """
 
-    def __init__(self, distance_map: DistanceMap, packages: PackageRepository, clock:SimulationClock):
+    def __init__(self, distance_map: DistanceMap, packages: PackageRepository, group_index: GroupIndex,
+                 address_index: AddressIndex, clock:SimulationClock):
         """
         Initializes the Routing object
 
@@ -28,6 +31,8 @@ class Routing:
         """
         self.distance_map = distance_map # stores the distance map of the packages, which is used to calculate the distance between addresses
         self.packages = packages # stores the hash map of the packages
+        self.group_index = group_index
+        self.address_index = address_index
         self.clock = clock # stores the clock of the simulation
 
         self.MAX_SIZE = 16
@@ -103,18 +108,20 @@ class Routing:
                 continue
 
 
+            group_members = self.group_index.group_members(package.package_id)
+
             #if the package is grouped with other packages
-            if package.must_be_delivered_with:
+            if group_members:
                 priority = 4  # default priority for grouped packages without deadline
                 # iterate through the packages that must be delivered with the current package
-                for pid in package.must_be_delivered_with:
+                for pid in group_members:
                     package_in_group = self.packages[pid]
                     # if any package in the group has a deadline, the priority is 2
                     if package_in_group.deadline:
                         priority = 2
                 group = []
                 # add all the packages in the group to the grouped set
-                for pid in package.must_be_delivered_with:
+                for pid in group_members:
                     groupmate = self.packages[pid]
                     grouped.add(groupmate.package_id)
                     group.append(groupmate.package_id)
@@ -132,7 +139,7 @@ class Routing:
             if the package has a deadline, and is not grouped with other packages, 
             add the package to the list of packages sorted by which package has the earliest deadline
             """
-            if package.deadline and not package.must_be_delivered_with:
+            if package.deadline and not group_members:
                 priority_queue.append((3, package.package_id))
                 packages_in_pq.append(package)
                 continue
@@ -268,7 +275,7 @@ class Routing:
         :return: List of eligible sibling package IDs
         """
         eligible_siblings = [] # initializes the list of eligible siblings
-        siblings = package.get_siblings() # gets the packages at the same address as the current package
+        siblings = self.address_index.packages_at(package.address)
 
         # if the package has siblings
         if siblings:
@@ -560,7 +567,7 @@ class Routing:
 
             # Insert siblings of deadline packages into the prioritized route
             for index, stop in enumerate(prioritized_route):
-                siblings = getattr(stop, 'packages_at_same_address', [])
+                siblings = self.address_index.packages_at(stop.address)
                 if siblings:
                     for sid in siblings:
                         sibling = self.packages[sid]

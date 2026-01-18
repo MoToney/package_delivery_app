@@ -23,7 +23,7 @@ class GroupIndex:
         merged.append(new_group)
         self._groups = merged
 
-    def group_for(self, package_id: int) -> set[int] | None:
+    def group_members(self, package_id: int) -> set[int] | None:
         for group in self._groups:
             if package_id in group:
                 return group
