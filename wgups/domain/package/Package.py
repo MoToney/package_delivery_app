@@ -85,27 +85,8 @@ class Package:
                  state: str = "Utah",
                  deadline: Optional[datetime] = None,
                  weight:Optional[float] = None,
-                 note: Optional[str] = None,
                  status: PackageStatus = PackageStatus.NOT_READY
                  ):
-        """
-        constructor which takes several package characteristics as parameters
-
-
-        :param package_id: id of the package
-        :param address: the street and house number of the package
-        :param city: the city of the package
-        :param zip_code: the zip code of the package
-        :param state: the state of the package
-        :param deadline: the time the package must be delivered by
-        :param weight: the weight of the package
-        :param note: the note of the package, denoting special handling guidelines
-        :param status: the status of the package, which is a phase in the PackageStatus Enum
-
-        :keyword state: set to the State of Utah by default
-        :keyword status: set to Not Ready by default
-    
-        """
 
         self.package_id = package_id
         self.address = address
@@ -114,7 +95,6 @@ class Package:
         self.zip_code = zip_code
         self.deadline = deadline
         self.weight = weight
-        self.note = note if note is not None else ""
         self.status = status
 
         self.address_w_zip = self.get_address_w_zip() # this is for standardization with the addresses in distances.csv
@@ -185,8 +165,7 @@ class Package:
         return (f"Package {self.package_id} | "
                 f"Address: {self.address}, {self.city}, {self.state}, {self.zip_code} | "
                 f"Deadline: {self.deadline.strftime('%I:%M %p') if self.deadline else 'N/A'} | "
-                f"Weight: {self.weight} | "
-                f"Note: {self.note if self.note else 'N/A'} | ")
+                f"Weight: {self.weight} | ")
 
 
 
