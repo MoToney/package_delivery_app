@@ -7,5 +7,5 @@ from wgups.domain.package.Address import Address
 @dataclass(frozen=True)
 class RouteStop:
     address: Address
-    package_ids: list[int]
-    travel_time_from_prev: timedelta
+    package_ids: tuple[int, ...]
+    distance_from_prev: float

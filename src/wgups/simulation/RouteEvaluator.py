@@ -6,6 +6,7 @@ from wgups.domain.address.DistanceMap import DistanceMap
 from wgups.domain.package.IDGenerator import IDGenerator
 from wgups.infrastructure.CSVPackageSource import CSVPackageSource
 from wgups.simulation import RoutingState
+from wgups.simulation.RouteStop import RouteStop
 from wgups.simulation.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.simulation.RoutingStateFactory import RoutingStateFactory
 from wgups.simulation.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
@@ -16,7 +17,7 @@ class RouteEvaluator:
     def evaluate(
             self,
             snapshot: RoutingState,
-            route: list[int],
+            route: list[RouteStop],
             start_time: datetime,
             start_location: str = "HUB",
             speed: float = 18.0,
@@ -25,15 +26,15 @@ class RouteEvaluator:
         location = start_location
         distance = 0.0
 
-        for pid in route:
-            pkg = snapshot.packages[pid]
-            d = snapshot.distance(location, pkg.address.distance_key())
-            distance += d
-            time += timedelta(hours=d / speed)
-            location = pkg.address.distance_key()
+
+        for stop in route:
+            distance += stop.distance_from_prev
+            time += timedelta(hours=stop.distance_from_prev / speed)
+
+            location = stop.address
 
         # return to hub
-        d = snapshot.distance(location, "HUB")
+        d = snapshot.distance(location.distance_key(), "HUB")
         distance += d
         time += timedelta(hours=d / speed)
 
@@ -58,7 +59,7 @@ selection_strategy = DeadlineFirstSelectionStrategy()
 selected = selection_strategy.select(state, truck_id=1, capacity=16)
 planner_strategy = NearestNeighborRoutePlanner()
 plan = planner_strategy.build(state, selected)
-print(plan)
+
 
 time, distance = RouteEvaluator().evaluate(state, plan, datetime(1900, 1, 1, 8, 0))
 print(time)
@@ -67,7 +68,7 @@ print(distance)
 state2 = route_factory.build(now=datetime(1900, 1, 1, 8, 0), package_state=package_snapshot, dispatched=selected)
 selected2 = selection_strategy.select(state2, truck_id=2, capacity=16)
 plan2 = planner_strategy.build(state2, selected2)
-print(plan2)
+
 time2, distance2 = RouteEvaluator().evaluate(state2, plan2, datetime(1900, 1, 1, 8, 0))
 print(time2, distance2)
 
