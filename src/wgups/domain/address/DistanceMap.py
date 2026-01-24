@@ -39,6 +39,7 @@ class DistanceMap:
         for i, row in enumerate(self.addresses):
             if row == addr:
                 return i
+        print(f"There is no {addr} in the matrix.")
         return None
 
     def __str__(self):

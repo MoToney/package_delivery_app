@@ -2,7 +2,6 @@ from wgups.domain.package.Package import Package, PackageStatus
 from wgups.domain.package.IDGenerator import IDGenerator
 from wgups.domain.package.PackageRecord import PackageRecord
 
-
 class PackageFactory:
     def __init__(self, id_generator: IDGenerator):
         self.id_generator = id_generator
@@ -13,8 +12,7 @@ class PackageFactory:
         status = PackageStatus.NOT_READY  # sets the status of the package to not ready
 
         package = Package(
-            package_id=package_id, address=package_record.address, city=package_record.city,
-            state=package_record.state,zip_code=package_record.zipcode,deadline=package_record.deadline,
+            package_id=package_id, address=package_record.address,deadline=package_record.deadline,
             weight=package_record.weight,status=status)  # creates a package object
 
         if package_record.constraints.grouped_packages is not None:
@@ -31,7 +29,6 @@ class PackageFactory:
         if package_record.constraints.wrong_address:
             package.wrong_address = True
             package.status = PackageStatus.NOT_READY
-
 
         return package
 

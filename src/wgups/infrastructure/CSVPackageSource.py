@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from typing import Optional, TextIO, Any
 
+from wgups.domain.package.Address import Address
 from wgups.domain.package.NoteConstraints import NoteConstraints
 from wgups.domain.package.PackageRecord import PackageRecord
 from wgups.exceptions import InvalidInputError
@@ -29,6 +30,9 @@ class CSVPackageSource:
 
         reader = csv.DictReader(file_obj)
         for row in reader:
+
+            address = Address(row['Address'], row['City'], row['State'], row['Zip'])
+
             try:
                 deadline = self._parse_deadline(row["Delivery"].strip())
             except ValueError as e:
@@ -40,10 +44,7 @@ class CSVPackageSource:
 
             package_records.append(
                 PackageRecord(
-                    address=row["Address"],
-                    city=row["City"],
-                    state=row["State"],
-                    zipcode=row["Zip"],
+                    address=address,
                     deadline=deadline,
                     weight=float(row["Weight"]),
                     constraints=note_constraints
@@ -78,12 +79,10 @@ class CSVPackageSource:
 
         if "must be delivered with" in note_str:
             match = re.findall(r'\d+', note_str)
-            grouped_packages = list(map(int,match))
+            grouped_packages = list(map(int, match))
         else:
             grouped_packages = None
 
         wrong_address = True if "wrong address" in note_str else False
 
         return NoteConstraints(required_truck, available_time, grouped_packages, wrong_address)
-
-

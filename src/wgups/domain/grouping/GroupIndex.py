@@ -29,3 +29,6 @@ class GroupIndex:
                 return group
         return None
 
+    def snapshot(self) -> list[frozenset[int]]:
+        return [frozenset(group) for group in self._groups]
+

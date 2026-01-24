@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from datetime import timedelta
 
-from wgups.simulation.SimulationClock import SimulationClock
+from wgups.simulation import SimulationClock
 from wgups.domain.package.Package import TruckCarrier, PackageStatus
 from wgups.domain.address.DistanceMap import DistanceMap
 
@@ -15,7 +15,8 @@ class Truck:
     The truck manages package loading, delivery, and route execution.
     It tracks its location, distance traveled, and delivery status.
     """
-    def __init__(self, truck_id: int = 0, distance_map: Optional[DistanceMap] = None, clock: Optional[SimulationClock] = None):
+    def __init__(self, truck_id: int = 0, distance_map: Optional[DistanceMap] = None, clock: Optional[
+        SimulationClock] = None):
         """
         Initializes a Truck object.
         
@@ -102,11 +103,11 @@ class Truck:
 
         package = self.packages_in_truck[index]
         # Calculate distance and travel time to package destination
-        dist = self.distance_map.get_distance(self.location, package.address_w_zip)
+        dist = self.distance_map.get_distance(self.location, package.address.distance_key())
         self.distance_travelled += dist
         travel_time = timedelta(hours=dist / 18.0)  # 18 mph average speed
         delivery_time = self.clock.now() + travel_time
-        self.location = package.address_w_zip  # Update truck location
+        self.location = package.address.distance_key()  # Update truck location
 
         # Mark package as delivered and record delivery time
         package.set_status(PackageStatus.DELIVERED)
@@ -124,7 +125,7 @@ class Truck:
             self.deliver_package, index + 1
         )
         print(
-            f"[{delivery_time.strftime('%H:%M')}] (scheduled) Truck {self.truck_id} delivered package {package.package_id} to {package.address_w_zip}")
+            f"[{delivery_time.strftime('%H:%M')}] (scheduled) Truck {self.truck_id} delivered package {package.package_id} to {package.address.distance_key()}")
 
     def return_to_hub(self) -> str:
         """

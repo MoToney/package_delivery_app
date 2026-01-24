@@ -2,9 +2,9 @@ from io import StringIO
 from datetime import datetime
 import pytest
 
-from wgups.infrastructure.CSVPackageSource import CSVPackageSource
-from wgups.domain.package.PackageRecord import PackageRecord
-from wgups.domain.package.NoteConstraints import NoteConstraints
+from wgups.src.infrastructure.CSVPackageSource import CSVPackageSource
+from wgups.domain.package import PackageRecord
+from wgups.src.domain.package.NoteConstraints import NoteConstraints
 from wgups.exceptions import InvalidInputError
 
 
@@ -29,7 +29,7 @@ def test_package_record_fields_are_parsed_correctly():
     source = CSVPackageSource()
     record = source._load(StringIO(csv_data))[0]
 
-    assert record.address == "410 S State St"
+    assert record.street_address == "410 S State St"
     assert record.city == "Salt Lake City"
     assert record.state == "UT"
     assert record.zipcode == "84111"

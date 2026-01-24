@@ -8,6 +8,12 @@ class PackageRepository:
     def add(self, package: Package) -> None:
         self.repository[package.package_id] = package
 
+    def snapshot(self) -> dict[int, Package]:
+        return {
+            pkg.package_id: pkg.copy()
+            for pkg in self.repository.values()
+        }
+
     def __str__(self):
         return str(self.repository.values())
 

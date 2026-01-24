@@ -1,0 +1,13 @@
+simulation:
+  start_time: "08:00"
+  end_time: "17:00"
+  capacity: 16
+
+paths:
+  packages_csv: "data/packages.csv"
+  distances_csv: "data/distances.csv"
+
+routing:
+  heuristic: "nearest_neighbor"
+  allow_partial_loads: false
+

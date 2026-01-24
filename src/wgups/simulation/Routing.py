@@ -1,12 +1,16 @@
-
 from datetime import datetime, timedelta
 from typing import Any
 
 from wgups.domain.address.AddressIndex import AddressIndex
-from wgups.domain.grouping.GroupIndex import GroupIndex
+from wgups.domain.grouping import GroupIndex
+from wgups.domain.package.Address import Address
 from wgups.domain.package.Package import Package
+from wgups.simulation.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
+from wgups.simulation.planning import NearestNeighborRoutePlanner
+from wgups.simulation import RouteEvaluator
+from wgups.simulation import RoutingStateFactory
 
-from wgups.simulation.SimulationClock import SimulationClock
+from wgups.simulation import SimulationClock
 from wgups.domain.address.DistanceMap import DistanceMap
 from wgups.application.PackageRepository import PackageRepository
 
@@ -21,7 +25,7 @@ class Routing:
     """
 
     def __init__(self, distance_map: DistanceMap, packages: PackageRepository, group_index: GroupIndex,
-                 address_index: AddressIndex, clock:SimulationClock):
+                 address_index: AddressIndex, clock: SimulationClock):
         """
         Initializes the Routing object
 
@@ -29,11 +33,16 @@ class Routing:
         :param packages: The hash map of the packages
         :param clock: The clock of the simulation
         """
-        self.distance_map = distance_map # stores the distance map of the packages, which is used to calculate the distance between addresses
-        self.packages = packages # stores the hash map of the packages
+        self.distance_map = distance_map  # stores the distance map of the packages, which is used to calculate the distance between addresses
+        self.packages = packages  # stores the hash map of the packages
         self.group_index = group_index
         self.address_index = address_index
-        self.clock = clock # stores the clock of the simulation
+        self.clock = clock  # stores the clock of the simulation
+
+        self.snapshot_factory = RoutingStateFactory
+        self.selection_strategy = DeadlineFirstSelectionStrategy
+        self.route_planner = NearestNeighborRoutePlanner
+        self.evaluator = RouteEvaluator
 
         self.MAX_SIZE = 16
 
@@ -45,10 +54,11 @@ class Routing:
         :param next_stop: The next location of the truck
         :return: The travel time between the two addresses
         """
-        distance = self.distance_map.get_distance(current_stop, next_stop) # gets the distance between the two stops
-        return timedelta(hours=distance / 18.0) # returns the travel time between the two stops
+        distance = self.distance_map.get_distance(current_stop, next_stop)  # gets the distance between the two stops
+        return timedelta(hours=distance / 18.0)  # returns the travel time between the two stops
 
-    def get_estimated_delivery_time(self, current_time:datetime, current_location: str, address_w_zip: str) -> datetime:
+    def get_estimated_delivery_time(self, current_time: datetime, current_location: str,
+                                    address_w_zip: str) -> datetime:
         """
         Returns the estimated delivery time of a package
 
@@ -57,7 +67,8 @@ class Routing:
         :param address_w_zip: The address of the package
         :return: The estimated delivery time of the package
         """
-        return current_time + self.get_travel_time(current_location, address_w_zip) # returns the elapsed time between the current time and the estimated delivery time
+        return current_time + self.get_travel_time(current_location,
+                                                   address_w_zip)  # returns the elapsed time between the current time and the estimated delivery time
 
     def update_address(self, package_id: int) -> None:
         """
@@ -66,11 +77,13 @@ class Routing:
         :param package_id: The id of the package to update
         :return: None
         """
-        package = self.packages[package_id] # gets the package from the hash map
-        package.set_full_address("410 S. State St.", "Salt Lake City", "Utah", "84111") # sets the full address of the package (address, city, state, zip code)
-        package.set_address_w_zip("410 S State St(84111)") # sets the address with zip code of the package for use in the distance map
+        package = self.packages[package_id]  # gets the package from the hash map
+        new_address = Address("410 S State St", "Salt Lake City", "Utah",
+                                 "84111")
+        package.address = new_address
 
-    def get_priority_queue(self, current_time:datetime, dispatched_packages: set, truck_id: int) -> (list[tuple[int, Any]], list[Package]):
+    def get_priority_queue(self, current_time: datetime, dispatched_packages: set, truck_id: int) -> (
+            list[tuple[int, Any]], list[Package]):
         """
 
         Builds a priority queue of packages available for delivery with the following priority:
@@ -85,11 +98,11 @@ class Routing:
         :param truck_id: The id of the truck that the package is on
         :return: A priority queue of packages available for delivery
         """
-        priority_queue = [] # initializes the priority queue
-        packages_in_pq = [] # this will be referenced in self.select_packages_by_priority
-        grouped = set() # initializes the set of grouped packages to avoid duplicates
+        priority_queue = []  # initializes the priority queue
+        packages_in_pq = []  # this will be referenced in self.select_packages_by_priority
+        grouped = set()  # initializes the set of grouped packages to avoid duplicates
 
-        #checks if the package is in the grouped set, has been visited, has the wrong address, is not available, or is required for another truck
+        # checks if the package is in the grouped set, has been visited, has the wrong address, is not available, or is required for another truck
         for package in self.packages:
             # if the package is in the grouped set, it is already being considered for delivery
             if package.package_id in grouped:
@@ -101,16 +114,15 @@ class Routing:
             if package.available_time is not None and package.available_time > current_time:
                 continue
             # if the package has the wrong address, and the update address time has not been reached, the package is not eligible for delivery
-            if package.wrong_address and datetime(1900,1,1,10,20) > current_time:
+            if package.wrong_address and datetime(1900, 1, 1, 10, 20) > current_time:
                 continue
             # if the package is required for another truck, it is not eligible for delivery on this truck
             if package.required_truck and package.required_truck != truck_id:
                 continue
 
-
             group_members = self.group_index.group_members(package.package_id)
 
-            #if the package is grouped with other packages
+            # if the package is grouped with other packages
             if group_members:
                 priority = 4  # default priority for grouped packages without deadline
                 # iterate through the packages that must be delivered with the current package
@@ -126,12 +138,14 @@ class Routing:
                     grouped.add(groupmate.package_id)
                     group.append(groupmate.package_id)
                     packages_in_pq.append(groupmate)
-                priority_queue.append((priority, group)) # add the grouped packages to the priority queue with the priority established above
+                priority_queue.append((priority,
+                                       group))  # add the grouped packages to the priority queue with the priority established above
                 continue
 
             # if the package is required for this truck, the priority is 1
             if package.required_truck == truck_id:
-                priority_queue.append((1, package.package_id)) # add the package to the priority queue with the priority of 1
+                priority_queue.append(
+                    (1, package.package_id))  # add the package to the priority queue with the priority of 1
                 packages_in_pq.append(package)
                 continue
 
@@ -148,10 +162,12 @@ class Routing:
             priority_queue.append((5, package.package_id))
             packages_in_pq.append(package)
 
-        priority_queue.sort(key=lambda x: x[0], reverse=True) # sort in ascending order so more prioritized packages are first
+        priority_queue.sort(key=lambda x: x[0],
+                            reverse=True)  # sort in ascending order so more prioritized packages are first
         return priority_queue, packages_in_pq
 
-    def select_packages_by_priority(self, priority_queue: list[tuple[int, Any]], packages_in_pq: list[Package], current_time:datetime) -> list[int]:
+    def select_packages_by_priority(self, priority_queue: list[tuple[int, Any]], packages_in_pq: list[Package],
+                                    current_time: datetime) -> list[int]:
         """
         Selects the packages to be delivered by the truck based on the priority of the package
         and its distance from other packages that are also being delivered
@@ -162,12 +178,11 @@ class Routing:
 
         :return: A list of packages to be delivered by the truck
         """
-        primary = [] # initializes the list of packages to be delivered by the truck
-        current_location = "HUB" # initializes the current location of the truck
-        p3_packages = [] # initializes the list of packages with a deadline
-        p5_packages = [] # initializes the list of packages with no special conditions  
-        mock_time = current_time # initializes the mock time of the truck
-
+        primary = []  # initializes the list of packages to be delivered by the truck
+        current_location = "HUB"  # initializes the current location of the truck
+        p3_packages = []  # initializes the list of packages with a deadline
+        p5_packages = []  # initializes the list of packages with no special conditions
+        mock_time = current_time  # initializes the mock time of the truck
 
         # while the priority queue is not empty and the truck has not reached its maximum size
         while priority_queue and len(primary) < self.MAX_SIZE:
@@ -189,27 +204,28 @@ class Routing:
                 if len(package_id) > (self.MAX_SIZE - len(primary)):
                     continue  # skip if group can't fit
 
-                grouped_packages_w_deadline = [] # initializes the list of packages with a deadline
+                grouped_packages_w_deadline = []  # initializes the list of packages with a deadline
                 # iterate through the packages in the group
                 for pid in package_id:
                     pkg = self.packages[pid]
                     # if the package has a deadline, add it to the list of packages with a deadline
                     if pkg.deadline:
-                        grouped_packages_w_deadline.append((pkg.deadline, pkg.package_id, pkg.address_w_zip))
-                group_deliverable = True # initializes the group deliverable flag
-                local_time = mock_time # initializes the local time of the truck
-                local_location = current_location # initializes the local location of the truck
-                grouped_packages_w_deadline.sort(key=lambda x: x[0], reverse=True) # sort by earliest deadline
+                        grouped_packages_w_deadline.append((pkg.deadline, pkg.package_id, pkg.address.distance_key()))
+                group_deliverable = True  # initializes the group deliverable flag
+                local_time = mock_time  # initializes the local time of the truck
+                local_location = current_location  # initializes the local location of the truck
+                grouped_packages_w_deadline.sort(key=lambda x: x[0], reverse=True)  # sort by earliest deadline
                 # while the list of packages with a deadline is not empty check if the packages can be delivered on time
                 while grouped_packages_w_deadline:
                     deadline, p_id, addr_zip = grouped_packages_w_deadline.pop()
-                    eta = self.get_estimated_delivery_time(local_time, local_location, addr_zip) # gets the estimated delivery time of the package based on the current time, location, and address
+                    eta = self.get_estimated_delivery_time(local_time, local_location,
+                                                           addr_zip)  # gets the estimated delivery time of the package based on the current time, location, and address
                     # if the estimated delivery time is greater than the deadline, the group is not deliverable
                     if eta > deadline:
                         group_deliverable = False
                         break
-                    local_time = eta # updates the local time of the truck
-                    local_location = addr_zip # updates the local location of the truck
+                    local_time = eta  # updates the local time of the truck
+                    local_location = addr_zip  # updates the local location of the truck
                 # if the group is deliverable, add all the packages in the group to the list of packages to be delivered
                 if group_deliverable:
                     # iterate through the packages in the group
@@ -217,8 +233,8 @@ class Routing:
                         # if the package is not already in the list of packages to be delivered and the truck has not reached its maximum size, add the package to the list
                         if pid not in primary and len(primary) < self.MAX_SIZE:
                             primary.append(pid)
-                    mock_time = local_time # updates the mock time of the truck
-                    current_location = local_location # updates the current location of the truck
+                    mock_time = local_time  # updates the mock time of the truck
+                    current_location = local_location  # updates the current location of the truck
 
             # check the packages that are already in the list of packages to be delivered to see if there are packages at the same address that are not already in the list
             for pid in primary:
@@ -227,14 +243,16 @@ class Routing:
 
             # if the package is not grouped with other packages and has a deadline
             if prio == 3:
-                pkg = self.packages[package_id] # gets the package from the hash map
+                pkg = self.packages[package_id]  # gets the package from the hash map
                 if self.get_estimated_delivery_time(mock_time, current_location,
-                                                      pkg.address_w_zip) <= pkg.deadline:
-                    p3_packages.append(self.packages[package_id]) # add the package to the list of packages with a deadline
+                                                    pkg.address.distance_key()) <= pkg.deadline:
+                    p3_packages.append(
+                        self.packages[package_id])  # add the package to the list of packages with a deadline
 
             # if the package is not grouped with other packages, required for this truck, and has no deadline
             if prio == 5:
-                p5_packages.append(self.packages[package_id]) # add the package to the list of packages with no special conditions
+                p5_packages.append(
+                    self.packages[package_id])  # add the package to the list of packages with no special conditions
 
             # if the package is grouped with other packages and has no deadline, raise an error because this should not happen
             if prio == 4:
@@ -242,25 +260,27 @@ class Routing:
 
         # after all packages have been checked, handle the packages with a deadline, starting with the earliest deadline
         for dline in sorted({pkg.deadline for pkg in p3_packages if pkg.deadline}):
-            batch = [pkg for pkg in p3_packages if pkg.deadline == dline] # get all the packages with the same deadline
-            sorted_batch = self.sort_nearest_neighbors(batch, current_location) # sort the packages by the nearest neighbor
+            batch = [pkg for pkg in p3_packages if pkg.deadline == dline]  # get all the packages with the same deadline
+            sorted_batch = self.sort_nearest_neighbors(batch,
+                                                       current_location)  # sort the packages by the nearest neighbor
             for pkg in sorted_batch:
                 if pkg.package_id not in primary and len(primary) < self.MAX_SIZE:
-                    eta = self.get_estimated_delivery_time(mock_time, current_location, pkg.address_w_zip)
+                    eta = self.get_estimated_delivery_time(mock_time, current_location, pkg.address.distance_key())
                     if eta <= pkg.deadline:
                         primary.append(pkg.package_id)
-                        current_location = pkg.address_w_zip
+                        current_location = pkg.address.distance_key()
                         mock_time = eta
                         primary = self.add_siblings_to_primary(pkg, primary, packages_in_pq)
 
         # if the truck has not reached its maximum size, and there are packages with no special conditions, add the packages to the list of packages to be delivered
         if len(primary) < self.MAX_SIZE and p5_packages:
-            sorted_p5 = self.sort_nearest_neighbors(p5_packages, current_location) # sort the packages with no special conditions by the nearest neighbor
+            sorted_p5 = self.sort_nearest_neighbors(p5_packages,
+                                                    current_location)  # sort the packages with no special conditions by the nearest neighbor
             # iterate through the sorted packages
             for pkg in sorted_p5:
                 # if the package is not already in the list of packages to be delivered, and the truck has not reached its maximum size, add the package to the list of packages to be delivered
                 if pkg.package_id not in primary and len(primary) < self.MAX_SIZE:
-                    primary.append(pkg.package_id) # add the package to the list of packages to be delivered
+                    primary.append(pkg.package_id)  # add the package to the list of packages to be delivered
                     primary = self.add_siblings_to_primary(pkg, primary, packages_in_pq)
 
         return primary
@@ -274,7 +294,7 @@ class Routing:
         :param packages_in_pq: The packages that are in the priority queue
         :return: List of eligible sibling package IDs
         """
-        eligible_siblings = [] # initializes the list of eligible siblings
+        eligible_siblings = []  # initializes the list of eligible siblings
         siblings = self.address_index.packages_at(package.address)
 
         # if the package has siblings
@@ -283,10 +303,10 @@ class Routing:
             for sid in siblings:
                 # if the sibling is not the current package, is not already in the list of packages to be delivered, and the truck has not reached its maximum size, and the sibling is in the priority queue, add the sibling to the list of eligible siblings
                 if (sid != package.package_id and
-                    sid not in primary and
-                    len(primary) < self.MAX_SIZE and # if the truck has not reached its maximum size
-                    self.packages[sid] in packages_in_pq):
-                    eligible_siblings.append(sid) # add the sibling to the list of eligible siblings
+                        sid not in primary and
+                        len(primary) < self.MAX_SIZE and  # if the truck has not reached its maximum size
+                        self.packages[sid] in packages_in_pq):
+                    eligible_siblings.append(sid)  # add the sibling to the list of eligible siblings
         return eligible_siblings
 
     def add_siblings_to_primary(self, package: Package, primary: list[int], packages_in_pq: list[Package]) -> list[int]:
@@ -297,16 +317,17 @@ class Routing:
         :param primary: The current list of packages to be delivered
         :param packages_in_pq: The packages in the priority queue
         """
-        eligible_siblings = self.get_eligible_siblings(package, primary, packages_in_pq) # gets the eligible siblings
+        eligible_siblings = self.get_eligible_siblings(package, primary, packages_in_pq)  # gets the eligible siblings
         mock_primary = primary
         for sid in eligible_siblings:
             if len(mock_primary) < self.MAX_SIZE:
-                mock_primary.append(sid) # add the eligible sibling to the list of packages to be delivered
+                mock_primary.append(sid)  # add the eligible sibling to the list of packages to be delivered
         return mock_primary
 
-    def sort_packages_by_deadline(self, prioritized_packages: list[int]) -> tuple[list[tuple[datetime, list[Package]]], list[Package]]:
+    def sort_packages_by_deadline(self, prioritized_packages: list[int]) -> tuple[
+        list[tuple[datetime, list[Package]]], list[Package]]:
         deadline_groups = []
-        regulars = [] # initializes the list of packages with no deadline
+        regulars = []  # initializes the list of packages with no deadline
 
         # iterate through the prioritized packages
         for pid in prioritized_packages:
@@ -317,19 +338,20 @@ class Routing:
                 for group in deadline_groups:
                     # if the deadline is already in the list of deadline groups
                     if group[0] == pkg.deadline:
-                        group[1].append(pkg) #add the pkg to the list of packages that share that deadline
+                        group[1].append(pkg)  # add the pkg to the list of packages that share that deadline
                         found = True
                         break
                 if not found:
                     deadline_groups.append([pkg.deadline, [pkg]])
             else:
-                regulars.append(pkg) # add the package to the list of packages with no deadline
+                regulars.append(pkg)  # add the package to the list of packages with no deadline
 
         return deadline_groups, regulars
 
-    def build_prioritized_route(self, deadline_groups: list[tuple[datetime, list[Package]]], current_time: datetime, current_location: str) -> tuple[list[Package], timedelta]:
-        base_route = [] # initializes the list of packages to be delivered
-        slack_time = timedelta(hours=24) # initializes the slack time, this is the time that the truck can be late by
+    def build_prioritized_route(self, deadline_groups: list[tuple[datetime, list[Package]]], current_time: datetime,
+                                current_location: str) -> tuple[list[Package], timedelta]:
+        base_route = []  # initializes the list of packages to be delivered
+        slack_time = timedelta(hours=24)  # initializes the slack time, this is the time that the truck can be late by
 
         deadline_groups.sort(key=lambda x: x[0])
 
@@ -338,25 +360,29 @@ class Routing:
 
             # if the deadline has only one package listed under it
             if len(group) == 1:
-                package = group[0] # get the package from the group
-                arrival_time = self.get_estimated_delivery_time(current_time, current_location, package.address_w_zip)
-                slack_time = min(slack_time, (package.deadline - arrival_time)) # update the slack time
-                base_route.append(package) # add the package to the base route
-                current_location = package.address_w_zip
+                package = group[0]  # get the package from the group
+                arrival_time = self.get_estimated_delivery_time(current_time, current_location, package.address.distance_key())
+                slack_time = min(slack_time, (package.deadline - arrival_time))  # update the slack time
+                base_route.append(package)  # add the package to the base route
+                current_location = package.address.distance_key()
                 current_time = arrival_time
             else:
                 # Sort packages by nearest neighbor and deliver them
-                sorted_group = self.sort_nearest_neighbors(group, current_location) # sort the group by the nearest neighbor
+                sorted_group = self.sort_nearest_neighbors(group,
+                                                           current_location)  # sort the group by the nearest neighbor
                 for package in sorted_group:
-                    arrival_time = self.get_estimated_delivery_time(current_time, current_location, package.address_w_zip) # get the estimated delivery time of the package
-                    slack_time = min(slack_time, (package.deadline - arrival_time)) # update the slack time
-                    base_route.append(package) # add the package to the base route
-                    current_location = package.address_w_zip
+                    arrival_time = self.get_estimated_delivery_time(current_time, current_location,
+                                                                    package.address.distance_key())  # get the estimated delivery time of the package
+                    slack_time = min(slack_time, (package.deadline - arrival_time))  # update the slack time
+                    base_route.append(package)  # add the package to the base route
+                    current_location = package.address.distance_key()
                     current_time = arrival_time
 
         return base_route, slack_time
 
-    def find_all_feasible_insertions(self, starting_point: str | Package, base_route: list[Package], unprioritized_packages: list[Package], slack_time: timedelta) -> list[tuple[float, int, Any, Any, Package]]:
+    def find_all_feasible_insertions(self, starting_point: str | Package, base_route: list[Package],
+                                     unprioritized_packages: list[Package], slack_time: timedelta) -> list[
+        tuple[float, int, Any, Any, Package]]:
         """
         Finds all feasible insertion points for packages in the route
         
@@ -377,12 +403,13 @@ class Routing:
                 # Calculate travel time from previous stop to package (only once per package)
                 if time_prev_stop_to_package is None:
                     if isinstance(starting_point, str):
-                        time_prev_stop_to_package = self.get_travel_time("HUB", package.address_w_zip)
+                        time_prev_stop_to_package = self.get_travel_time("HUB", package.address.distance_key())
                     elif isinstance(starting_point, Package):
-                        time_prev_stop_to_package = self.get_travel_time(previous_stop.address_w_zip, package.address_w_zip)
+                        time_prev_stop_to_package = self.get_travel_time(previous_stop.address.distance_key(),
+                                                                         package.address.distance_key())
 
                 # Calculate travel time from package to next stop
-                time_package_to_next_stop = self.get_travel_time(package.address_w_zip, stop.address_w_zip)
+                time_package_to_next_stop = self.get_travel_time(package.address.distance_key(), stop.address.distance_key())
                 # Total additional time if package is inserted here
                 time_added = time_prev_stop_to_package + time_package_to_next_stop
 
@@ -392,7 +419,7 @@ class Routing:
                     should_insert = True
                     if isinstance(previous_stop, Package):
                         # Compare with original direct route time
-                        original_time = self.get_travel_time(previous_stop.address_w_zip, stop.address_w_zip)
+                        original_time = self.get_travel_time(previous_stop.address.distance_key(), stop.address.distance_key())
                         should_insert = time_added < original_time
 
                     if should_insert:
@@ -404,7 +431,10 @@ class Routing:
         choices.sort(key=lambda x: x[0], reverse=True)
         return choices
 
-    def insert_best_feasible_packages(self, base_route: list[Package], insertion_heap: list[tuple[float, int, Any, Any, Package]], remaining_packages: list[Package], slack_time: timedelta) -> tuple[list[Package], timedelta, list[Package]]:
+    def insert_best_feasible_packages(self, base_route: list[Package],
+                                      insertion_heap: list[tuple[float, int, Any, Any, Package]],
+                                      remaining_packages: list[Package], slack_time: timedelta) -> tuple[
+        list[Package], timedelta, list[Package]]:
         """
         Inserts the best feasible packages into the route
         
@@ -416,7 +446,8 @@ class Routing:
         """
         inserted_packages = set()
 
-        while insertion_heap and slack_time > timedelta(0):  # add packages in their optimal position until the slack_time is exhausted
+        while insertion_heap and slack_time > timedelta(
+                0):  # add packages in their optimal position until the slack_time is exhausted
             travel_time, counter, prev_stop, next_stop, package = insertion_heap.pop()
 
             if travel_time > slack_time:
@@ -448,7 +479,8 @@ class Routing:
 
         return base_route, slack_time, remaining_packages
 
-    def _find_insertion_index(self, base_route: list[Package], prev_stop: str | Package, next_stop: Package) -> int | None:
+    def _find_insertion_index(self, base_route: list[Package], prev_stop: str | Package,
+                              next_stop: Package) -> int | None:
         """
         Finds the insertion index for a package between prev_stop and next_stop
         
@@ -467,7 +499,8 @@ class Routing:
                         return i + 1
         return None
 
-    def build_regular_route(self, route: list[Package], packages_not_in_route: list[Package], current_stop: str | Package) -> list[Package]:
+    def build_regular_route(self, route: list[Package], packages_not_in_route: list[Package],
+                            current_stop: str | Package) -> list[Package]:
         """
         Builds a regular route using nearest neighbor algorithm
         
@@ -480,7 +513,7 @@ class Routing:
             if isinstance(current_stop, str):
                 next_package = self.get_nearest_neighbor(packages_not_in_route, current_stop)
             elif isinstance(current_stop, Package):
-                next_package = self.get_nearest_neighbor(packages_not_in_route, current_stop.address_w_zip)
+                next_package = self.get_nearest_neighbor(packages_not_in_route, current_stop.address.distance_key())
             else:
                 break
 
@@ -489,7 +522,8 @@ class Routing:
             packages_not_in_route.remove(next_package)
         return route
 
-    def get_mock_completion_time_and_distance(self, route: list[Package | str], current_time: datetime, current_location: str) -> tuple[datetime, float]:
+    def get_mock_completion_time_and_distance(self, route: list[Package | str], current_time: datetime,
+                                              current_location: str) -> tuple[datetime, float]:
         """
         Calculates the completion time and total distance for a route
         
@@ -502,7 +536,7 @@ class Routing:
 
         for stop in route:
             if isinstance(stop, Package):
-                stop_address = stop.address_w_zip
+                stop_address = stop.address.distance_key()
             elif isinstance(stop, str):
                 stop_address = stop
             else:
@@ -533,7 +567,8 @@ class Routing:
         if not packages:
             return None
 
-        nearest_neighbor = min(packages, key=lambda pkg: self.distance_map.get_distance(current_location, pkg.address_w_zip))
+        nearest_neighbor = min(packages,
+                               key=lambda pkg: self.distance_map.get_distance(current_location, pkg.address.distance_key()))
         return nearest_neighbor
 
     def sort_nearest_neighbors(self, pkgs: list[Package], start_location: str) -> list[Package]:
@@ -549,13 +584,14 @@ class Routing:
         to_visit = set(pkgs)
 
         while to_visit:
-            nearest = min(to_visit, key=lambda pkg: self.get_travel_time(current, pkg.address_w_zip))
+            nearest = min(to_visit, key=lambda pkg: self.get_travel_time(current, pkg.address.distance_key()))
             route.append(nearest)
-            current = nearest.address_w_zip
+            current = nearest.address.distance_key()
             to_visit.remove(nearest)
         return route
 
-    def sort_packages(self, prioritized_packages: list[int], current_time: datetime, dispatched_packages: set) -> tuple[list[Package], datetime, float, set[int]]:
+    def sort_packages(self, prioritized_packages: list[int], current_time: datetime, dispatched_packages: set) -> tuple[
+        list[Package], datetime, float, set[int]]:
         current_location = "HUB"
         dispatched_packages = dispatched_packages.union(prioritized_packages)
 
@@ -573,7 +609,7 @@ class Routing:
                         sibling = self.packages[sid]
                         # If sibling is in regular packages, insert it right after the deadline package
                         if sibling and sibling in regular_packages:
-                            prioritized_route.insert(index+1, sibling)
+                            prioritized_route.insert(index + 1, sibling)
                             regular_packages.remove(sibling)
 
             # add the packages that have potential to be fit in between the expedited packages
@@ -593,11 +629,13 @@ class Routing:
             completed_route = self.build_regular_route(route=[], packages_not_in_route=regular_packages,
                                                        current_stop="HUB")
 
-        completed_time, miles_travelled = self.get_mock_completion_time_and_distance(completed_route, current_time, "HUB")
+        completed_time, miles_travelled = self.get_mock_completion_time_and_distance(completed_route, current_time,
+                                                                                     "HUB")
 
         return completed_route, completed_time, miles_travelled, dispatched_packages
 
-    def build_route(self, route_id: int, current_time: datetime, dispatched_packages: set) -> tuple[list[Package], datetime, float, set[int]]:
+    def build_route(self, route_id: int, current_time: datetime, dispatched_packages: set) -> tuple[
+        list[Package], datetime, float, set[int]]:
         """
         Builds a route for a truck
         
@@ -608,7 +646,9 @@ class Routing:
         """
         priority_queue, packages_in_pq = self.get_priority_queue(current_time, dispatched_packages, route_id)
         priorities = self.select_packages_by_priority(priority_queue, packages_in_pq, current_time)
-        final_route, final_time, final_miles_travelled, final_dispatched_packages = self.sort_packages(priorities, current_time, dispatched_packages)
+        final_route, final_time, final_miles_travelled, final_dispatched_packages = self.sort_packages(priorities,
+                                                                                                       current_time,
+                                                                                                       dispatched_packages)
 
         return final_route, final_time, final_miles_travelled, final_dispatched_packages
 
