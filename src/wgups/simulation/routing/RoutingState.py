@@ -10,7 +10,7 @@ class RoutingState:
 
     # Read model
     packages: dict[int, Package]  # id -> Package (resolved state)
-    groups: list[frozenset[int]]  # package_id -> group ids
+    groups: dict[int, frozenset[int]] # package_id -> group ids
     address_index: dict[str, set[int]]  # address -> package ids
 
     # Pure adapter

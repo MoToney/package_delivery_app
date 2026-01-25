@@ -5,12 +5,12 @@ from wgups.domain.address.AddressIndex import AddressIndex
 from wgups.domain.grouping import GroupIndex
 from wgups.domain.package.Address import Address
 from wgups.domain.package.Package import Package
-from wgups.simulation.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
-from wgups.simulation.planning import NearestNeighborRoutePlanner
-from wgups.simulation import RouteEvaluator
-from wgups.simulation import RoutingStateFactory
+from wgups.simulation.routing.selection import DeadlineFirstSelectionStrategy
+from wgups.simulation.routing.planning import NearestNeighborRoutePlanner
+from wgups.simulation.routing.evaluation import RouteEvaluator
+from wgups.simulation.routing import RoutingStateFactory
 
-from wgups.simulation import SimulationClock
+from wgups.simulation.time import SimulationClock
 from wgups.domain.address.DistanceMap import DistanceMap
 from wgups.application.PackageRepository import PackageRepository
 

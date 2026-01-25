@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from config.load_config import load_config
 from datetime import datetime
 from typing import  Optional
@@ -11,8 +9,8 @@ from wgups.domain.package.IDGenerator import IDGenerator
 from wgups.domain.package.Package import Package, PackageStatus
 from wgups.infrastructure.CSVPackageSource import CSVPackageSource
 from wgups.simulation.Routing import Routing
-from wgups.simulation.Truck import Truck
-from wgups.simulation.SimulationClock import SimulationClock
+from wgups.simulation.model.Truck import Truck
+from wgups.simulation.time.SimulationClock import SimulationClock
 
 from pathlib import Path
 

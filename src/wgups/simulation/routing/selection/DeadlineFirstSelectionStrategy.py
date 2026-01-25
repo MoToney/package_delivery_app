@@ -1,28 +1,26 @@
+from wgups.simulation.routing import RoutingState
 
-from wgups.simulation import RoutingState
-from dataclasses import dataclass
-
-from wgups.simulation.selection.Candidate import Candidate
+from wgups.simulation.routing.selection.Candidate import Candidate
 
 
 class DeadlineFirstSelectionStrategy:
     @staticmethod
-    def select(snapshot: RoutingState, truck_id, capacity) -> list[int]:
+    def select(routing_state: RoutingState, truck_id, max_route_length) -> list[int]:
         selected = []
         used = set()
 
         # build candidates
         candidates = []
-        for pid, pkg in snapshot.packages.items():
+        for pid, pkg in routing_state.packages.items():
             if pid in used:
                 continue
 
             if pkg.required_truck and pkg.required_truck != truck_id:
                 continue
 
-            group = snapshot.groups.get(pid)
+            group = routing_state.groups.get(pid)
             if group:
-                members = [snapshot.packages[x] for x in group]
+                members = [routing_state.packages[x] for x in group]
                 candidates.append(
                     Candidate(
                         package_ids=list(group),
@@ -51,7 +49,7 @@ class DeadlineFirstSelectionStrategy:
         candidates.sort(key=score)
 
         for c in candidates:
-            if len(selected) + len(c.package_ids) > capacity:
+            if len(selected) + len(c.package_ids) > max_route_length:
                 continue
             selected.extend(c.package_ids)
 
