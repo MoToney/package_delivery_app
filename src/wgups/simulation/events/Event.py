@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Callable, Any
+
+from wgups.simulation.events.EventType import EventType
 
 
-@dataclass(order=True)
+@dataclass(order=True, frozen=True)
 class Event:
     time: datetime
     seq: int
-    callback: Callable
-    args: tuple[Any, ...]
+    type: EventType
+    payload: dict

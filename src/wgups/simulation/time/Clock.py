@@ -1,8 +1,8 @@
 import heapq
 from datetime import datetime
-from typing import Callable
 
 from wgups.simulation.events.Event import Event
+from wgups.simulation.events.EventType import EventType
 
 
 class Clock:
@@ -15,23 +15,20 @@ class Clock:
     def now(self) -> datetime:
         return self._now
 
-    def schedule(self, when: datetime, callback: Callable, *args):
-        if when < self._now:
+    def schedule(self, *, time: datetime, event_type: EventType, payload: dict):
+        if time < self._now:
             raise ValueError("Cannot schedule event in the past")
 
-        if not callable(callback):
-            raise TypeError("callback must be callable")
-
         event = Event(
-            time=when,
+            time=time,
             seq=self._seq,
-            callback=callback,
-            args=args
+            type=event_type,
+            payload=payload,
         )
         self._seq += 1
         heapq.heappush(self._queue, event)
 
-    def run(self, until: datetime | None = None):
+    def run(self, dispatcher, until: datetime | None = None):
         self._running = True
 
         while self._queue and self._running:
@@ -42,11 +39,7 @@ class Clock:
                 break
 
             self._now = event.time
-            event.callback(*event.args)
+            dispatcher.dispatch(event)
 
     def stop(self):
         self._running = False
-
-
-
-

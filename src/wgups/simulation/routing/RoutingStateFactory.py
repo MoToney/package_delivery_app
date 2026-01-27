@@ -11,7 +11,7 @@ class RoutingStateFactory:
         self.distance_map = distance_map
         self.policy = eligibility_policy
 
-    def build(
+    def build_state(
             self,
             *,
             now: datetime,

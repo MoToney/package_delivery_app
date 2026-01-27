@@ -16,9 +16,9 @@ class CSVPackageSource:
             return []
 
         with open(path, 'r') as f:
-            return self._load(f, source_name=path)
+            return self.load(f, source_name=path)
 
-    def _load(
+    def load(
             self,
             file_obj: TextIO,
             source_name: str = "<in-memory>",

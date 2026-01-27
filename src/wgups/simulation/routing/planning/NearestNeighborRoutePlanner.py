@@ -4,8 +4,9 @@ from wgups.simulation.model.RouteStop import RouteStop
 
 
 class NearestNeighborRoutePlanner:
+
+    @staticmethod
     def build(
-            self,
             state: RoutingState,
             package_ids: list[int],
             start: Address,
@@ -13,7 +14,7 @@ class NearestNeighborRoutePlanner:
 
         remaining = {pid: state.packages[pid] for pid in package_ids}
         route = []
-        current = start
+        current = start.distance_key()
 
         while remaining:
 

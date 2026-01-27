@@ -8,4 +8,4 @@ class Address:
     zip_code: str
 
     def distance_key(self):
-        return (f"{self.street_address}({self.zip_code})")
+        return f"{self.street_address}({self.zip_code})"

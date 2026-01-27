@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from wgups.domain.package.Package import Package
 
 
@@ -17,8 +19,8 @@ class PackageRepository:
     def __str__(self):
         return str(self.repository.values())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Package]:
         return iter(self.repository.values())
 
-    def __getitem__(self,key):
+    def __getitem__(self,key) -> Package:
         return self.repository.get(key)

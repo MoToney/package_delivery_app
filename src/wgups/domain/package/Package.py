@@ -7,12 +7,14 @@ e.	Gets loaded into the truck
 f.	Gets loaded into the data structure containing all packages
 
 '''
-
+from dataclasses import dataclass
 from enum import Enum
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from wgups.domain.package.Address import Address
+from wgups.simulation.events.Event import Event
+from wgups.simulation.events.EventType import EventType
 
 
 class PackageStatus(Enum):
@@ -21,7 +23,7 @@ class PackageStatus(Enum):
     """
     NOT_READY = 0
     AT_HUB = 1
-    IN_ROUTE = 2
+    EN_ROUTE = 2
     DELIVERED = 3
 
     def __str__(self):
@@ -29,34 +31,13 @@ class PackageStatus(Enum):
             return "Not Available"
         elif self.AT_HUB:
             return "At Hub"
-        elif self.IN_ROUTE:
-            return "In Route"
+        elif self.EN_ROUTE:
+            return "En Route"
         elif self.DELIVERED:
             return "Delivered"
         else:
             return "Unknown Status"
-
-
-class TruckCarrier(Enum):
-    """
-    returns the truck that is associated with the object
-    """
-    NONE = 0
-    TRUCK_1 = 1
-    TRUCK_2 = 2
-    TRUCK_3 = 3
-
-    def __str__(self):
-        if self is TruckCarrier.TRUCK_1:
-            return 'Truck 1'
-        elif self is TruckCarrier.TRUCK_2:
-            return 'Truck 2'
-        elif self is TruckCarrier.TRUCK_3:
-            return 'Truck 3'
-        elif self is TruckCarrier.NONE:
-            return 'No Truck Assigned'
-        else:
-            return 'None'
+        # truck_id, address, note, etc.
 
 
 class Package:
@@ -75,7 +56,6 @@ class Package:
         wrong_address (bool): Whether the package has the wrong address
         delivery_time (datetime or None): The time the package was delivered
         departure_time (datetime or None): The time the package was loaded onto a truck and left the hub
-        truck_carrier (TruckCarrier): The truck that is associated with the package
     """
 
     def __init__(self,
@@ -97,24 +77,45 @@ class Package:
         self.required_truck: Optional[int] = None  # stores the truck that is required to deliver the package, if any
         self.wrong_address: bool = False  # stores whether the package has the wrong address, default is False
 
+        self.truck_carrier: Optional[int] = None
         self.delivery_time: Optional[datetime] = None
         self.departure_time: Optional[datetime] = None
-        self.truck_carrier: TruckCarrier = TruckCarrier.NONE
+
+        self.history: List[Event] = []
+
+    def validate_event(self, event: Event):
+        if event.type == EventType.PACKAGE_DELIVERED:
+            if self.status != PackageStatus.EN_ROUTE:
+                raise RuntimeError("Cannot deliver a package that is not en route")
+
+    def apply_event(self, event: Event):
+        match event.type:
+
+
+            case EventType.PACKAGE_LOADED:
+                self.status = PackageStatus.EN_ROUTE
+                self.departure_time = event.time
+                self.truck_carrier = event.payload["truck_id"]
+
+            case EventType.PACKAGE_DELIVERED:
+                self.status = PackageStatus.DELIVERED
+                self.delivery_time = event.time
+                self.truck_carrier = None
+
+            case EventType.PACKAGE_ADDRESS_UPDATED:
+                self.address = event.payload["updated_address"]
+                self.wrong_address = False
+
+            case _:
+                raise ValueError(f"Unhandled event type: {event.type}")
+
+    def handle_event(self, event: Event):
+        self.validate_event(event)
+        self.apply_event(event)
+        self.history.append(event)
 
     def set_status(self, status: PackageStatus):
         self.status = status
-
-    def set_truck(self, truck: TruckCarrier) -> None:
-        self.truck_carrier = truck
-
-    def get_truck(self) -> TruckCarrier:
-        """
-        Returns string of the truck carrier of the package
-
-        :return: TruckCarrier
-        :attribute: truck_carrier: TruckCarrier.TRUCK_1, TruckCarrier.TRUCK_2, TruckCarrier.TRUCK_3, or TruckCarrier.NONE
-        """
-        return self.truck_carrier
 
     def set_delivery_time(self, delivery_time: datetime) -> None:
         """
@@ -135,7 +136,7 @@ class Package:
     def copy(self) -> "Package":
         clone = Package(
             package_id=self.package_id,
-            address = self.address,
+            address=self.address,
             deadline=self.deadline,
             weight=self.weight,
             status=self.status,

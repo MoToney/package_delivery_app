@@ -15,7 +15,7 @@ def test_creates_package_records_from_csv():
 """
 
     source = CSVPackageSource()
-    records = source._load(StringIO(csv_data))
+    records = source.load(StringIO(csv_data))
 
     assert len(records) == 2
     assert all(isinstance(r, PackageRecord) for r in records)
@@ -27,7 +27,7 @@ def test_package_record_fields_are_parsed_correctly():
 """
 
     source = CSVPackageSource()
-    record = source._load(StringIO(csv_data))[0]
+    record = source.load(StringIO(csv_data))[0]
 
     assert record.street_address == "410 S State St"
     assert record.city == "Salt Lake City"
@@ -49,7 +49,7 @@ def test_eod_deadline_becomes_none():
 """
 
     source = CSVPackageSource()
-    record = source._load(StringIO(csv_data))[0]
+    record = source.load(StringIO(csv_data))[0]
 
     assert record.deadline is None
 
@@ -62,7 +62,7 @@ def test_invalid_deadline_raises_invalid_input_error():
     source = CSVPackageSource()
 
     with pytest.raises(InvalidInputError):
-        source._load(StringIO(csv_data))
+        source.load(StringIO(csv_data))
 
 
 def test_note_available_time_are_parsed_correctly():
@@ -71,7 +71,7 @@ def test_note_available_time_are_parsed_correctly():
 """
 
     source = CSVPackageSource()
-    record = source._load(StringIO(csv_data))[0]
+    record = source.load(StringIO(csv_data))[0]
     constraints = record.constraints
 
 
@@ -89,7 +89,7 @@ def test_note_grouped_packages_are_parsed_correctly():
 """
 
     source = CSVPackageSource()
-    record = source._load(StringIO(csv_data))[0]
+    record = source.load(StringIO(csv_data))[0]
     constraints = record.constraints
 
 
@@ -105,7 +105,7 @@ def test_note_required_truck_is_parsed_correctly():
 """
 
     source = CSVPackageSource()
-    record = source._load(StringIO(csv_data))[0]
+    record = source.load(StringIO(csv_data))[0]
     constraints = record.constraints
 
 
@@ -121,7 +121,7 @@ def test_note_grouped_packages_are_parsed_correctly():
 """
 
     source = CSVPackageSource()
-    record = source._load(StringIO(csv_data))[0]
+    record = source.load(StringIO(csv_data))[0]
     constraints = record.constraints
 
 
