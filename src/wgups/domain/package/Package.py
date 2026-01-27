@@ -1,18 +1,8 @@
-'''
-a.	Has a status to see if delivered, in route, or at hub
-b.	Has a specific truck
-c.	Has a specific time ready
-d.	40 packages in total
-e.	Gets loaded into the truck
-f.	Gets loaded into the data structure containing all packages
-
-'''
-from dataclasses import dataclass
 from enum import Enum
 from datetime import datetime
 from typing import Optional, List
 
-from wgups.domain.package.Address import Address
+from wgups.domain.address.Address import Address
 from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
 

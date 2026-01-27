@@ -1,11 +1,11 @@
 
 from datetime import datetime
 from wgups.application.PackageSnapshot import PackageSnapshot
-from wgups.domain.package.Address import Address
-from wgups.simulation.model.Route import Route
-from wgups.simulation.routing.RoutingStateFactory import RoutingStateFactory
-from wgups.simulation.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
-from wgups.simulation.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
+from wgups.domain.address.Address import Address
+from wgups.domain.route.Route import Route
+from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
+from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
+from wgups.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
 
 
 class RouteBuilder:

@@ -2,15 +2,17 @@ import heapq
 from datetime import datetime
 
 from wgups.simulation.events.Event import Event
+from wgups.simulation.events.EventLog import EventLog
 from wgups.simulation.events.EventType import EventType
 
 
 class Clock:
-    def __init__(self, start_time: datetime):
+    def __init__(self, start_time: datetime, event_log: EventLog):
         self._now = start_time
         self._queue: list[Event] = []
         self._seq = 0
         self._running = False
+        self.event_log = event_log
 
     def now(self) -> datetime:
         return self._now
@@ -25,6 +27,7 @@ class Clock:
             type=event_type,
             payload=payload,
         )
+        self.event_log.append(event)
         self._seq += 1
         heapq.heappush(self._queue, event)
 

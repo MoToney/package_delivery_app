@@ -1,9 +1,9 @@
 from datetime import datetime
 
 from wgups.application.PackageSnapshot import PackageSnapshot
-from wgups.domain.address.DistanceMap import DistanceMap
-from wgups.simulation.routing.RoutingEligibilityPolicy import RoutingEligibilityPolicy
-from wgups.simulation.routing.RoutingState import RoutingState
+from wgups.infrastructure.distance.DistanceMap import DistanceMap
+from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
+from wgups.routing.state.RoutingState import RoutingState
 
 
 class RoutingStateFactory:

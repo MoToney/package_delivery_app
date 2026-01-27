@@ -1,26 +1,27 @@
-from config.load_config import load_config
 from datetime import datetime
+from config.load_config import load_config
 from wgups.application.PackageFactory import PackageFactory
 from wgups.application.PackageManager import PackageManager
-from wgups.domain.address.DistanceMap import DistanceMap
-from wgups.domain.package.Address import Address
-from wgups.domain.package.IDGenerator import IDGenerator
+from wgups.infrastructure.distance.DistanceMap import DistanceMap
+from wgups.domain.address.Address import Address
+from wgups.infrastructure.IDGenerator import IDGenerator
 from wgups.infrastructure.CSVPackageSource import CSVPackageSource
-from wgups.simulation.routing.RouteBuilder import RouteBuilder
+from wgups.routing.RouteBuilder import RouteBuilder
+from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.simulation.events.EventDispatcher import EventDispatcher
 from wgups.simulation.events.EventType import EventType
-from wgups.simulation.model.Truck import Truck
-from wgups.simulation.routing.RoutingController import RoutingController
-from wgups.simulation.routing.RoutingEligibilityPolicy import RoutingEligibilityPolicy
-from wgups.simulation.routing.RoutingStateFactory import RoutingStateFactory
-from wgups.simulation.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
-from wgups.simulation.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
+from wgups.simulation.entities.Truck import Truck
+from wgups.simulation.events.EventLog import EventLog
+from wgups.simulation.orchestration.RoutingController import RoutingController
+from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
+from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
+from wgups.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
 from wgups.simulation.time.Clock import Clock
 from pathlib import Path
 
 # Configuration constants
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CONFIG = load_config(PROJECT_ROOT / "config" / "config.yaml")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CONFIG = load_config(PROJECT_ROOT / "config/config.yaml")
 CAPACITY = 16
 PACKAGES_PATH = PROJECT_ROOT / CONFIG["paths"]['packages_csv']
 DISTANCES_PATH = PROJECT_ROOT / CONFIG["paths"]['distances_csv']
@@ -48,10 +49,11 @@ route_builder = RouteBuilder(
     planner_strategy=planner
 )
 
+event_log = EventLog()
 dispatcher = EventDispatcher()
 
 # --- clock ---
-clock = Clock(start_time=START_TIME)
+clock = Clock(start_time=START_TIME, event_log=event_log)
 
 clock.schedule(
     time=datetime(1900, 1, 1, 10, 20, 00),
@@ -111,5 +113,6 @@ for truck in trucks:
         event_type=EventType.TRUCK_AVAILABLE,
         payload={"truck_id": truck.truck_id}
     )
+print("Starting WGUPS simulation")
 
 clock.run(dispatcher, until=None)

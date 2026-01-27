@@ -1,8 +1,7 @@
 from wgups.application.PackageManager import PackageManager
-from wgups.domain.package.Address import Address
-from wgups.simulation.routing.RouteBuilder import RouteBuilder
+from wgups.routing.RouteBuilder import RouteBuilder
 from wgups.simulation.events.Event import Event
-from wgups.simulation.model.Truck import Truck
+from wgups.simulation.entities.Truck import Truck
 from wgups.simulation.time.Clock import Clock
 
 
@@ -16,6 +15,7 @@ class RoutingController:
         self.dispatched: set[int] = set()
 
     def handle_truck_available(self, event: Event):
+        print(f"\nTruck {event.payload["truck_id"]} at HUB at {event.time}")
         truck = self.trucks[event.payload["truck_id"]]
 
         snapshot = self.state_provider.snapshot()

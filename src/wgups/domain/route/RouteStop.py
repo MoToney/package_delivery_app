@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from wgups.domain.package.Address import Address
+from wgups.domain.address.Address import Address
 
 @dataclass(frozen=True)
 class RouteStop:

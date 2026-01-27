@@ -1,6 +1,6 @@
 from wgups.domain.package.Package import Package, PackageStatus
-from wgups.domain.package.IDGenerator import IDGenerator
-from wgups.domain.package.PackageRecord import PackageRecord
+from wgups.infrastructure.IDGenerator import IDGenerator
+from wgups.application.PackageRecord import PackageRecord
 
 class PackageFactory:
     def __init__(self, id_generator: IDGenerator):

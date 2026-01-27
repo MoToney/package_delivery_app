@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from typing import Optional
 from datetime import timedelta, datetime
 
-from wgups.domain.package.Address import Address
+from wgups.domain.address.Address import Address
 from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
-from wgups.simulation.model.Route import Route
-from wgups.simulation.model.RouteStop import RouteStop
+from wgups.domain.route.Route import Route
+from wgups.domain.route import RouteStop
 from wgups.simulation.time import Clock
 
 
@@ -15,8 +15,6 @@ class TruckMovement:
     start_time: datetime
     end_time: datetime
     distance: float
-
-
 
 
 class Truck:
@@ -61,9 +59,11 @@ class Truck:
                 )
 
         first_stop = self.next_stop()
-        travel_time = self.travel_duration(first_stop.distance_from_prev)
+        distance = first_stop.distance_from_prev
+        travel_time = self.travel_duration(distance)
 
-        # The truck schedules its own arrival
+        self.record_movement(now, distance)
+
         clock.schedule(
             time=now + travel_time,
             event_type=EventType.TRUCK_ARRIVED_AT_STOP,
@@ -90,16 +90,24 @@ class Truck:
 
         next_stop = self.next_stop()
         if next_stop:
-            arrival_time = event.time + self.travel_duration(next_stop.distance_from_prev)
+            distance = next_stop.distance_from_prev
+            departure_time = event.time
+
+            self.record_movement(departure_time, distance)
+
             clock.schedule(
-                time=arrival_time,
+                time=departure_time + self.travel_duration(distance),
                 event_type=EventType.TRUCK_ARRIVED_AT_STOP,
                 payload={"truck_id": self.truck_id},
             )
+
         else:
-            return_time = event.time + self.travel_duration(
-                self.route.distance_to_return
-            )
+            distance = self.route.distance_to_return
+            departure_time = event.time
+            self.record_movement(departure_time, distance)
+
+            return_time = departure_time + self.travel_duration(distance)
+
 
             self.location = self.route.start
             self.route = None
@@ -114,9 +122,7 @@ class Truck:
     def travel_duration(self, distance: float) -> timedelta:
         return timedelta(hours=distance / self.SPEED)
 
-
-
-    def next_stop(self) -> RouteStop | None:
+    def next_stop(self) -> RouteStop or None:
         if self.route is None:
             return None
 
@@ -133,3 +139,19 @@ class Truck:
             return
 
         self.current_stop_index += 1
+
+    def record_movement(self, start: datetime, distance: float):
+        duration = self.travel_duration(distance)
+        self.movements.append(
+            TruckMovement(
+                start_time=start,
+                end_time=start + duration,
+                distance=distance,
+            )
+        )
+
+    def total_distance(self) -> float:
+        return sum(m.distance for m in self.movements)
+
+
+

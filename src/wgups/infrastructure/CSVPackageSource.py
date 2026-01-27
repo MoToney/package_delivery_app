@@ -3,9 +3,9 @@ import re
 from datetime import datetime
 from typing import Optional, TextIO, Any
 
-from wgups.domain.package.Address import Address
-from wgups.domain.package.NoteConstraints import NoteConstraints
-from wgups.domain.package.PackageRecord import PackageRecord
+from wgups.domain.address.Address import Address
+from wgups.domain.constraints.Constraints import NoteConstraints
+from wgups.application.PackageRecord import PackageRecord
 from wgups.exceptions import InvalidInputError
 
 

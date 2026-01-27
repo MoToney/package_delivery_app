@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
-from wgups.simulation.routing import RoutingState
-from wgups.simulation.model.RouteStop import RouteStop
+from wgups.routing.state import RoutingState
+from wgups.domain.route import RouteStop
 
 
 class RouteEvaluator:

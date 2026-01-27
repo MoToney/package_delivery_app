@@ -1,6 +1,6 @@
-from wgups.domain.package.Address import Address
-from wgups.simulation.routing import RoutingState
-from wgups.simulation.model.RouteStop import RouteStop
+from wgups.domain.address.Address import Address
+from wgups.domain.route.RouteStop import RouteStop
+from wgups.routing.state import RoutingState
 
 
 class NearestNeighborRoutePlanner:

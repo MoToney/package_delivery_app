@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from wgups.domain.package.Address import Address
-from wgups.simulation.model.RouteStop import RouteStop
+from wgups.domain.address.Address import Address
+from wgups.domain.route.RouteStop import RouteStop
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,6 @@
-from wgups.simulation.routing import RoutingState
+from wgups.routing.state import RoutingState
 
-from wgups.simulation.routing.selection.Candidate import Candidate
+from wgups.routing.selection.RoutingCandidate import Candidate
 
 
 class DeadlineFirstSelectionStrategy:
