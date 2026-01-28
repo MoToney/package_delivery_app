@@ -9,6 +9,7 @@ from wgups.infrastructure.CSVPackageSource import CSVPackageSource
 from wgups.routing.RouteBuilder import RouteBuilder
 from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.simulation.events.EventDispatcher import EventDispatcher
+from wgups.simulation.events.EventQueries import EventQueries
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.entities.Truck import Truck
 from wgups.simulation.events.EventLog import EventLog
@@ -116,3 +117,5 @@ for truck in trucks:
 print("Starting WGUPS simulation")
 
 clock.run(dispatcher, until=None)
+query = EventQueries(event_log)
+print(query.delivered_time(5))
