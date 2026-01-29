@@ -99,6 +99,11 @@ dispatcher.subscribe(
     package_manager.handle_package_address_corrected
 )
 
+dispatcher.subscribe(
+    EventType.PACKAGE_ADDRESS_UPDATED,
+    controller.handle_package_address_corrected
+)
+
 # initial trigger: all trucks are available at time 8:00
 for truck in trucks:
     dispatcher.subscribe(

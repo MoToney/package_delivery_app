@@ -2,6 +2,7 @@ from wgups.application.PackageManager import PackageManager
 from wgups.routing.RouteBuilder import RouteBuilder
 from wgups.simulation.events.Event import Event
 from wgups.simulation.entities.Truck import Truck
+from wgups.simulation.events.EventType import EventType
 from wgups.simulation.time.Clock import Clock
 
 
@@ -40,3 +41,17 @@ class RoutingController:
 
         # Controller makes ONE decision: give the truck work
         truck.begin_route_execution(route, event.time, self.clock)
+
+    def handle_package_address_corrected(self, event: Event):
+        """
+        A package became newly eligible.
+        If any trucks are idle at the hub, give routing another chance.
+        """
+
+        for truck in self.trucks.values():
+            if truck.is_idle():
+                self.clock.schedule(
+                    time=event.time,
+                    event_type=EventType.TRUCK_AVAILABLE,
+                    payload={"truck_id": truck.truck_id},
+                )

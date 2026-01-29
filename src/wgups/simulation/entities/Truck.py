@@ -153,5 +153,7 @@ class Truck:
     def total_distance(self) -> float:
         return sum(m.distance for m in self.movements)
 
+    def is_idle(self):
+        return self.route is None
 
 
