@@ -1,11 +1,13 @@
 from enum import Enum
-from datetime import datetime
-from typing import Optional, List
+from typing import List
 
 from wgups.domain.address.Address import Address
+from wgups.domain.package.PackageView import PackageView, to_view
 from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
 
+from datetime import datetime
+from typing import Optional
 
 class PackageStatus(Enum):
     """
@@ -123,28 +125,8 @@ class Package:
         """
         self.departure_time = departure_time
 
-    def copy(self) -> "Package":
-        clone = Package(
-            package_id=self.package_id,
-            address=self.address,
-            deadline=self.deadline,
-            weight=self.weight,
-            status=self.status,
-        )
-
-        # derived / mutable fields
-        clone.must_be_delivered_with = (
-            list(self.must_be_delivered_with)
-            if self.must_be_delivered_with
-            else None
-        )
-        clone.available_time = self.available_time
-        clone.required_truck = self.required_truck
-        clone.wrong_address = self.wrong_address
-        clone.delivery_time = self.delivery_time
-        clone.departure_time = self.departure_time
-        clone.truck_carrier = self.truck_carrier
-
+    def copy(self) -> PackageView:
+        clone = to_view(self)
         return clone
 
     def __str__(self):

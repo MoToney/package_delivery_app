@@ -40,17 +40,11 @@ class PackageManager:
         return self.group_index.snapshot()
 
     def snapshot(self) -> PackageSnapshot:
-        return PackageSnapshot(
+        return PackageSnapshot.make_snapshot(
             packages=self.snapshot_packages(),
             groups=self.snapshot_groups(),
             addresses=self.snapshot_addresses()
         )
-
-    def group_members(self, package_id: int) -> set[int]:
-        return self.group_index.group_members(package_id)
-
-    def package_ids_at_address(self, address: Address) -> list[int]:
-        return self.address_index.package_ids_at_address(address)
 
     def handle_package_loaded(self, event: Event):
         assert event.type == EventType.PACKAGE_LOADED

@@ -11,10 +11,10 @@ class AddressIndex:
     def add(self, package) -> None:
         self._address_index[package.address].append(package.package_id)
 
-    def package_ids_at_address(self, address: Address) -> list[int]:
+    def package_ids_at_address(self, address: Address) -> frozenset[int]:
         if not isinstance(address, Address):
             raise TypeError("AddressIndex keys must be Address instances")
-        return self._address_index[address]
+        return frozenset(self._address_index[address])
 
     def snapshot(self) -> dict[Address, frozenset[int]]:
         return {

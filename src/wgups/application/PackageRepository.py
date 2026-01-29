@@ -1,6 +1,7 @@
 from typing import Iterable
 
 from wgups.domain.package.Package import Package
+from wgups.domain.package.PackageView import PackageView
 
 
 class PackageRepository:
@@ -10,7 +11,7 @@ class PackageRepository:
     def add(self, package: Package) -> None:
         self.repository[package.package_id] = package
 
-    def snapshot(self) -> dict[int, Package]:
+    def snapshot(self) -> dict[int, PackageView]:
         return {
             pkg.package_id: pkg.copy()
             for pkg in self.repository.values()
