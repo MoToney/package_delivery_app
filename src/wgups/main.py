@@ -2,7 +2,7 @@ from datetime import datetime
 from config.load_config import load_config
 from wgups.application.PackageFactory import PackageFactory
 from wgups.application.PackageManager import PackageManager
-from wgups.infrastructure.distance.DistanceMap import DistanceMap
+from wgups.infrastructure.distance.CSVDistanceMap import DistanceMap, CSVDistanceMap
 from wgups.domain.address.Address import Address
 from wgups.infrastructure.IDGenerator import IDGenerator
 from wgups.infrastructure.CSVPackageSource import CSVPackageSource
@@ -36,7 +36,7 @@ id_generator = IDGenerator()
 p_factory = PackageFactory(id_generator)
 package_manager = PackageManager(p_factory)
 package_manager.add_many(records)
-distances = DistanceMap(DISTANCES_PATH)  # Load distance data from CSV
+distances = CSVDistanceMap(DISTANCES_PATH)  # Load distance data from CSV
 policy = RoutingEligibilityPolicy()
 
 route_state_factory = RoutingStateFactory(distance_map=distances,

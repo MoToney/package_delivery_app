@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from wgups.application.PackageSnapshot import PackageSnapshot
-from wgups.infrastructure.distance.DistanceMap import DistanceMap
+from wgups.infrastructure.distance.CSVDistanceMap import DistanceMap
 from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.routing.state.RoutingState import RoutingState
 
@@ -39,5 +39,5 @@ class RoutingStateFactory:
             packages=resolved_packages,
             groups=resolved_groups,
             address_index=resolved_addresses,
-            distance=self.distance_map.get_distance,
+            distance=self.distance_map.distance,
         )

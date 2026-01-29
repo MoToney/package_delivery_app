@@ -2,10 +2,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+from wgups.domain.address.Address import Address
+
+
 @dataclass(frozen=True)
 class PackageView:
     package_id: int
-    address: "Address"
+    address: Address
     deadline: Optional[datetime]
     weight: float
     status: "PackageStatus"

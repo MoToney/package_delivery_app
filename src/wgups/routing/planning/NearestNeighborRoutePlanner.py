@@ -14,15 +14,15 @@ class NearestNeighborRoutePlanner:
 
         remaining = {pid: state.packages[pid] for pid in package_ids}
         route = []
-        current = start.distance_key()
+        current = start
 
         while remaining:
 
             next_pkg = min(
                 remaining.values(),
-                key=lambda p: state.distance(current, p.address.distance_key())
+                key=lambda p: state.distance(current, p.address)
             )
-            travel_distance = state.distance(current, next_pkg.address.distance_key())
+            travel_distance = state.distance(current, next_pkg.address)
 
             if travel_distance == 0.00:
                 current_stop = route.pop()
@@ -41,7 +41,7 @@ class NearestNeighborRoutePlanner:
             )
 
             route.append(stop)
-            current = next_pkg.address.distance_key()
+            current = next_pkg.address
             del remaining[next_pkg.package_id]
 
         """return_stop = RouteStop(

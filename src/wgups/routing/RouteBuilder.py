@@ -41,11 +41,11 @@ class RouteBuilder:
 
         plan = self.planner_strategy.build(state, selected, start)
 
-        last_stop = plan[-1].address.distance_key()
+        last_stop = plan[-1].address
 
         return Route(
             start=start,
             stops=plan,
-            distance_to_return= state.distance(last_stop, start.distance_key())
+            distance_to_return= state.distance(last_stop, start)
         )
 

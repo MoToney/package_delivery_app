@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable
 
+from wgups.domain.address.Address import Address
 from wgups.domain.package.Package import Package
 
 @dataclass(frozen=True)
@@ -14,4 +15,4 @@ class RoutingState:
     address_index: dict[str, set[int]]  # address -> package ids
 
     # Pure adapter
-    distance: Callable[[str, str], float]
+    distance: Callable[[Address, Address], float]

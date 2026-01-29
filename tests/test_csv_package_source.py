@@ -5,7 +5,7 @@ import pytest
 from wgups.src.infrastructure.CSVPackageSource import CSVPackageSource
 from wgups.application import PackageRecord
 from wgups.src.domain.package.NoteConstraints import NoteConstraints
-from wgups.exceptions import InvalidInputError
+from wgups.infrastructure.exceptions import InvalidInputError
 
 
 def test_creates_package_records_from_csv():

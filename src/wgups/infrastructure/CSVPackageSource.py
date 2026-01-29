@@ -6,7 +6,7 @@ from typing import Optional, TextIO, Any
 from wgups.domain.address.Address import Address
 from wgups.domain.constraints.Constraints import NoteConstraints
 from wgups.application.PackageRecord import PackageRecord
-from wgups.exceptions import InvalidInputError
+from wgups.infrastructure.exceptions import InvalidInputError
 
 
 class CSVPackageSource:
