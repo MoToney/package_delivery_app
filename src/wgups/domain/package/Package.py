@@ -73,41 +73,48 @@ class Package:
         self.delivery_time: Optional[datetime] = None
         self.departure_time: Optional[datetime] = None
 
-        self.history: List[Event] = []
+        self.check_invariants()
 
-    def validate_event(self, event: Event):
-        if event.type == EventType.PACKAGE_DELIVERED:
-            if self.status != PackageStatus.EN_ROUTE:
-                raise RuntimeError("Cannot deliver a package that is not en route")
+    def load_onto_truck(self, *, truck_id: int, time: datetime):
+        if self.status not in (PackageStatus.AT_HUB, PackageStatus.NOT_READY):
+            return False
 
-    def apply_event(self, event: Event):
-        match event.type:
+        self.status = PackageStatus.EN_ROUTE
+        self.departure_time = time
+        self.truck_carrier = truck_id
+        self.check_invariants()
+        return True
 
+    def deliver(self, *, time: datetime):
+        self.status = PackageStatus.DELIVERED
+        self.delivery_time = time
+        self.truck_carrier = None
+        self.check_invariants()
+        return True
 
-            case EventType.PACKAGE_LOADED:
-                self.status = PackageStatus.EN_ROUTE
-                self.departure_time = event.time
-                self.truck_carrier = event.payload["truck_id"]
+    def update_address(self, *, address: Address):
+        self.address = address
+        self.wrong_address = False
+        self.status = PackageStatus.AT_HUB
+        self.check_invariants()
+        return True
 
-            case EventType.PACKAGE_DELIVERED:
-                self.status = PackageStatus.DELIVERED
-                self.delivery_time = event.time
-                self.truck_carrier = None
+    def check_invariants(self):
+        """Verify class invariants hold"""
+        assert self.package_id >= 0
+        assert self.weight is None or self.weight > 0
 
-            case EventType.PACKAGE_ADDRESS_UPDATED:
-                self.address = event.payload["updated_address"]
-                self.wrong_address = False
+        # Status-specific invariants
+        if self.status == PackageStatus.DELIVERED:
+            assert self.delivery_time is not None, "Delivered packages must have delivery time"
 
-            case _:
-                raise ValueError(f"Unhandled event type: {event.type}")
-
-    def handle_event(self, event: Event):
-        self.validate_event(event)
-        self.apply_event(event)
-        self.history.append(event)
+        if self.status == PackageStatus.EN_ROUTE:
+            assert self.departure_time is not None, "En route packages must have departure time"
+            assert self.truck_carrier is not None, "En route packages must have truck carrier"
 
     def set_status(self, status: PackageStatus):
         self.status = status
+        self.check_invariants()
 
     def set_delivery_time(self, delivery_time: datetime) -> None:
         """
@@ -118,12 +125,14 @@ class Package:
 
         """
         self.delivery_time = delivery_time
+        self.check_invariants()
 
     def set_departure_time(self, departure_time: datetime) -> None:
         """
         Sets the departure time of the package
         """
         self.departure_time = departure_time
+        self.check_invariants()
 
     def copy(self) -> PackageView:
         clone = to_view(self)

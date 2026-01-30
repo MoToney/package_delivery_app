@@ -49,19 +49,23 @@ class PackageManager:
     def handle_package_loaded(self, event: Event):
         assert event.type == EventType.PACKAGE_LOADED
         pkg = self.get_package(event.payload["package_id"])
-        pkg.handle_event(event)
+        truck_id = event.payload["truck_id"]
+        time = event.time
+        pkg.load_onto_truck(truck_id=truck_id, time=time)
         print(f"Package {pkg.package_id} loaded on Truck {event.payload['truck_id']} at: {event.time.time()}")
 
     def handle_package_delivered(self, event: Event):
         pkg = self.get_package(event.payload["package_id"])
         assert event.type == EventType.PACKAGE_DELIVERED
-        pkg.handle_event(event)
+        time = event.time
+        pkg.deliver(time=time)
         print(f"Package {pkg.package_id} delivered by Truck {event.payload['truck_id']} at: {event.time.time()}")
 
     def handle_package_address_corrected(self, event: Event):
         pkg = self.get_package(event.payload["package_id"])
         assert event.type == EventType.PACKAGE_ADDRESS_UPDATED
-        pkg.handle_event(event)
+        address = event.payload["updated_address"]
+        pkg.update_address(address=address)
         print(f"Package {pkg.package_id} address updated to {event.payload['updated_address']} at: {event.time.time()}")
 
     def get_package(self, package_id: int) -> Package:

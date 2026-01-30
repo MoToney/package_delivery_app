@@ -28,17 +28,24 @@ class CSVDistanceMap(DistanceMap):
         j = self.get_index(b.distance_key())  # gets the index of the second address
         return self.matrix[max(i, j)][min(i, j)]  # returns the distance between the two addresses
 
-    def get_index(self, addr: str) -> int | None:
+    def get_index(self, addr: str) -> int:
         """
-        Returns the index of the address within the matrix.
-        :param addr:
-        :return: int
+        Get index of address in matrix.
+
+        Raises:
+            KeyError: If address not found
         """
-        for i, row in enumerate(self.addresses):
-            if row == addr:
-                return i
-        print(f"There is no {addr} in the matrix.")
-        return None
+        try:
+            for i, row in enumerate(self.addresses):
+                if row == addr:
+                    return i
+        except KeyError:
+            raise KeyError(
+                f"Address '{addr}' not found in distance map. "
+                f"Available addresses: {', '.join(self.addresses[:5])}..."
+            )
+
+
 
 
 
