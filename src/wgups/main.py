@@ -2,6 +2,7 @@ from datetime import datetime
 from config.load_config import load_config
 from wgups.application.PackageFactory import PackageFactory
 from wgups.application.PackageManager import PackageManager
+from wgups.domain.truck.Truck import Truck
 from wgups.infrastructure.distance.CSVDistanceMap import DistanceMap, CSVDistanceMap
 from wgups.domain.address.Address import Address
 from wgups.infrastructure.IDGenerator import IDGenerator
@@ -9,9 +10,8 @@ from wgups.infrastructure.CSVPackageSource import CSVPackageSource
 from wgups.routing.RouteBuilder import RouteBuilder
 from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.simulation.events.EventDispatcher import EventDispatcher
-from wgups.simulation.events.EventQueries import EventQueries
+from wgups.simulation.events.QueryService import EventQueries
 from wgups.simulation.events.EventType import EventType
-from wgups.simulation.entities.Truck import Truck
 from wgups.simulation.events.EventLog import EventLog
 from wgups.simulation.orchestration.RoutingController import RoutingController
 from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
@@ -19,6 +19,8 @@ from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRo
 from wgups.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
 from wgups.simulation.time.Clock import Clock
 from pathlib import Path
+
+from wgups.simulation.truck.SimulatedTruck import SimulatedTruck
 
 # Configuration constants
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -68,8 +70,8 @@ clock.schedule(
 
 # --- trucks ---
 trucks = [
-    Truck(truck_id=1, location=HUB),
-    Truck(truck_id=2, location=HUB),
+    SimulatedTruck(Truck(truck_id=1), location=HUB,),
+    SimulatedTruck(Truck(truck_id=2), location=HUB),
 ]
 
 # --- routing controller ---

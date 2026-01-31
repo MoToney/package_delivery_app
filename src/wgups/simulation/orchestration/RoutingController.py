@@ -1,13 +1,13 @@
 from wgups.application.PackageManager import PackageManager
 from wgups.routing.RouteBuilder import RouteBuilder
-from wgups.simulation.entities.Truck import Truck
 from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.time.Clock import Clock
+from wgups.simulation.truck.SimulatedTruck import SimulatedTruck
 
 
 class RoutingController:
-    def __init__(self, *, clock: Clock, trucks: list[Truck], route_builder: RouteBuilder,
+    def __init__(self, *, clock: Clock, trucks: list[SimulatedTruck], route_builder: RouteBuilder,
                  package_state_provider: PackageManager):
         self.clock = clock
         self.trucks = {t.truck_id: t for t in trucks}
