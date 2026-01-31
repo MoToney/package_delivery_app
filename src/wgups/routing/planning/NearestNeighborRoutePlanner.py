@@ -59,6 +59,6 @@ class NearestNeighborRoutePlanner:
             route_plan.append(return_stop)
 
         return Route (
-            start=start,
+            start_location=start,
             stops=route_plan,
         )

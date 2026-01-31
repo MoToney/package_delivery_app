@@ -68,8 +68,8 @@ clock.schedule(
 
 # --- trucks ---
 trucks = [
-    Truck(truck_id=1, clock=clock, location=HUB),
-    Truck(truck_id=2, clock=clock, location=HUB),
+    Truck(truck_id=1, location=HUB),
+    Truck(truck_id=2, location=HUB),
 ]
 
 # --- routing controller ---
@@ -80,9 +80,15 @@ controller = RoutingController(
     package_state_provider=package_manager,
 )
 
+# Controller handles ALL truck-related events
 dispatcher.subscribe(
     EventType.TRUCK_AVAILABLE,
     controller.handle_truck_available,
+)
+
+dispatcher.subscribe(
+    EventType.TRUCK_ARRIVED_AT_STOP,
+    controller.handle_truck_arrived,  # NEW
 )
 
 dispatcher.subscribe(
@@ -107,14 +113,6 @@ dispatcher.subscribe(
 
 # initial trigger: all trucks are available at time 8:00
 for truck in trucks:
-    dispatcher.subscribe(
-        EventType.TRUCK_ARRIVED_AT_STOP,
-        lambda event, t=truck: (
-            t.on_arrived_at_stop(event, clock)
-            if event.payload["truck_id"] == t.truck_id
-            else None
-        ))
-
     clock.schedule(
         time=START_TIME,
         event_type=EventType.TRUCK_AVAILABLE,

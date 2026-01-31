@@ -25,116 +25,122 @@ class Truck:
     It tracks its location, distance traveled, and delivery status.
     """
 
-    def __init__(self, truck_id: int, speed: float = 18.0, capacity: int = 16, location: Optional[Address] = None,
-                 clock: Optional[Clock] = None):
+    def __init__(self, truck_id: int, speed: float = 18.0, capacity: int = 16, location: Optional[Address] = None):
         self.truck_id = truck_id
         self.CAPACITY = capacity
         self.SPEED = speed
 
-        self.clock = clock
-
-        self.packages = None
         self.location = location
-        self.distance_travelled = 0.0  # Total distance traveled in miles
 
         self.route: Optional[Route] = None
-        self.current_stop_index: Optional[int] = None
+        self.stop_index: Optional[int] = None
 
         self.movements: list[TruckMovement] = []
 
-    def begin_route_execution(self, route: Route, now: datetime, clock: Clock):
+    def start_route(self, route: Route, now: datetime):
         self.route = route
-        self.current_stop_index = 0
+        self.stop_index = 0
+
+        events = []
 
         # Truck declares what just happened: packages were loaded
         for stop in route.stops:
             for pkg_id in stop.package_ids:
-                clock.schedule(
-                    time=now,
-                    event_type=EventType.PACKAGE_LOADED,
-                    payload={
+                events.append({
+                    "time": now,
+                    "event_type": EventType.PACKAGE_LOADED,
+                    "payload": {
                         "package_id": pkg_id,
-                        "truck_id": self.truck_id,
-                    },
-                )
+                        "truck_id": self.truck_id
+                    }
+                })
 
-        first_stop = self.next_stop()
-        distance = first_stop.distance_from_prev
-        travel_time = self.travel_duration(distance)
+        events.append(self.schedule_next_stop(now))
 
-        self.record_movement(now, distance)
+        return events
 
-        clock.schedule(
-            time=now + travel_time,
-            event_type=EventType.TRUCK_ARRIVED_AT_STOP,
-            payload={"truck_id": self.truck_id},
-        )
-
-    def on_arrived_at_stop(self, event: Event, clock: Clock) -> None:
+    def handle_arrival(self, event: Event) -> list[dict]:
+        """Process arrival at stop, return events to be scheduled"""
         stop = self.next_stop()
+
+        assert stop is not None
+
         self.location = stop.address
 
-        # Truck states what happened
+        events = []
+
+        # Delivery events
         for pkg_id in stop.package_ids:
-            clock.schedule(
-                time=event.time,
-                event_type=EventType.PACKAGE_DELIVERED,
-                payload={
+            events.append({
+                "time": event.time,
+                "event_type": EventType.PACKAGE_DELIVERED,
+                "payload": {
                     "package_id": pkg_id,
                     "truck_id": self.truck_id,
                     "address": stop.address,
-                },
-            )
+                }
+            })
+        self.advance_stop()
 
-        self.advance_to_next_stop()
-
-        next_stop = self.next_stop()
-        if next_stop:
-            distance = next_stop.distance_from_prev
-            departure_time = event.time
-            self.record_movement(departure_time, distance)
-
-            arrival_time  = departure_time + self.travel_duration(distance)
-
-            clock.schedule(
-                time=arrival_time,
-                event_type=EventType.TRUCK_ARRIVED_AT_STOP,
-                payload={"truck_id": self.truck_id},
-            )
+        evt = self.schedule_next_stop(event.time)
+        if evt:
+            events.append(evt)
+            return events
 
         else:
-            self.location = self.route.start
-            self.route = None
-            self.current_stop_index = None
 
-            clock.schedule(
-                time=event.time,
-                event_type=EventType.TRUCK_AVAILABLE,
-                payload={"truck_id": self.truck_id},
-            )
+            # Route complete - return to hub
+            if self.location != self.route.start_location and self.route.returns_to_hub:
+                raise ValueError("Truck should be at hub after completing route")
+
+            self.location = self.route.start_location
+            self.route = None
+            self.stop_index = None
+            events.append({
+                "time": event.time,
+                "event_type": EventType.TRUCK_AVAILABLE,
+                "payload": {"truck_id": self.truck_id}
+            })
+            return events
+
+    def schedule_next_stop(self, departure_time: datetime) -> Optional[dict]:
+        """Schedule travel to next stop, return arrival event or None"""
+        next_stop = self.next_stop()
+        if not next_stop:
+            return None
+
+        distance = next_stop.distance_from_prev
+        self.log_movement(departure_time, distance)
+        arrival_time = departure_time + self.travel_duration(distance)
+
+        return {
+            "time": arrival_time,
+            "event_type": EventType.TRUCK_ARRIVED_AT_STOP,
+            "payload": {"truck_id": self.truck_id}
+        }
 
     def travel_duration(self, distance: float) -> timedelta:
         return timedelta(hours=distance / self.SPEED)
 
-    def next_stop(self) -> RouteStop or None:
+    def next_stop(self) -> Optional[RouteStop]:
         if self.route is None:
             return None
 
-        assert 0 <= self.current_stop_index <= len(self.route.stops)
+        assert 0 <= self.stop_index <= len(self.route.stops)
 
         return (
-            self.route.stops[self.current_stop_index]
-            if self.current_stop_index < len(self.route.stops)
+            self.route.stops[self.stop_index]
+            if self.stop_index < len(self.route.stops)
             else None
         )
 
-    def advance_to_next_stop(self) -> None:
+    def advance_stop(self) -> None:
         if self.route is None:
             return
 
-        self.current_stop_index += 1
+        self.stop_index += 1
 
-    def record_movement(self, start: datetime, distance: float):
+    def log_movement(self, start: datetime, distance: float):
         duration = self.travel_duration(distance)
         self.movements.append(
             TruckMovement(
@@ -144,10 +150,5 @@ class Truck:
             )
         )
 
-    def total_distance(self) -> float:
-        return sum(m.distance for m in self.movements)
-
-    def is_idle(self):
+    def is_available(self):
         return self.route is None
-
-

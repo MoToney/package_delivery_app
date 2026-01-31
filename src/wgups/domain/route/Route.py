@@ -6,7 +6,7 @@ from wgups.domain.route.RouteStop import RouteStop
 
 @dataclass(frozen=True)
 class Route:
-    start: Address
+    start_location: Address
     stops: list[RouteStop]
 
     @property
