@@ -92,29 +92,23 @@ class Truck:
         if next_stop:
             distance = next_stop.distance_from_prev
             departure_time = event.time
-
             self.record_movement(departure_time, distance)
 
+            arrival_time  = departure_time + self.travel_duration(distance)
+
             clock.schedule(
-                time=departure_time + self.travel_duration(distance),
+                time=arrival_time,
                 event_type=EventType.TRUCK_ARRIVED_AT_STOP,
                 payload={"truck_id": self.truck_id},
             )
 
         else:
-            distance = self.route.distance_to_return
-            departure_time = event.time
-            self.record_movement(departure_time, distance)
-
-            return_time = departure_time + self.travel_duration(distance)
-
-
             self.location = self.route.start
             self.route = None
             self.current_stop_index = None
 
             clock.schedule(
-                time=return_time,
+                time=event.time,
                 event_type=EventType.TRUCK_AVAILABLE,
                 payload={"truck_id": self.truck_id},
             )

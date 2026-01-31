@@ -1,31 +1,35 @@
+from typing import Callable
+
 from wgups.domain.address.Address import Address
+from wgups.domain.route.Route import Route
 from wgups.domain.route.RouteStop import RouteStop
 from wgups.routing.state import RoutingState
 
 
 class NearestNeighborRoutePlanner:
-
     @staticmethod
     def build(
             state: RoutingState,
             package_ids: list[int],
             start: Address,
-    ) -> list[RouteStop]:
+            distance: Callable[[Address, Address], float],
+            return_to_start: bool = True,
+    ) -> Route:
 
         remaining = {pid: state.packages[pid] for pid in package_ids}
-        route = []
+        route_plan = []
         current = start
 
         while remaining:
 
             next_pkg = min(
                 remaining.values(),
-                key=lambda p: state.distance(current, p.address)
+                key=lambda p: distance(current, p.address)
             )
-            travel_distance = state.distance(current, next_pkg.address)
+            travel_distance = distance(current, next_pkg.address)
 
             if travel_distance == 0.00:
-                current_stop = route.pop()
+                current_stop = route_plan.pop()
                 address = current_stop.address
                 package_ids = current_stop.package_ids + (next_pkg.package_id,)
                 distance_from_prev = current_stop.distance_from_prev
@@ -40,15 +44,21 @@ class NearestNeighborRoutePlanner:
                 distance_from_prev=distance_from_prev,
             )
 
-            route.append(stop)
+            route_plan.append(stop)
             current = next_pkg.address
             del remaining[next_pkg.package_id]
 
-        """return_stop = RouteStop(
-            address=start,
-            package_ids=[],
-            distance_from_prev=snapshot.distance(current, start)
-        )
-        route.append(return_stop)"""
+        if return_to_start:
 
-        return route
+            return_stop = RouteStop(
+                address=start,
+                package_ids=tuple(),
+                distance_from_prev=distance(current, start)
+            )
+
+            route_plan.append(return_stop)
+
+        return Route (
+            start=start,
+            stops=route_plan,
+        )

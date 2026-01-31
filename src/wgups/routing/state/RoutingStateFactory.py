@@ -7,8 +7,7 @@ from wgups.routing.state.RoutingState import RoutingState
 
 
 class RoutingStateFactory:
-    def __init__(self, distance_map: DistanceMap, eligibility_policy: RoutingEligibilityPolicy):
-        self.distance_map = distance_map
+    def __init__(self, eligibility_policy: RoutingEligibilityPolicy):
         self.policy = eligibility_policy
 
     def build_state(
@@ -39,5 +38,4 @@ class RoutingStateFactory:
             packages=resolved_packages,
             groups=resolved_groups,
             address_index=resolved_addresses,
-            distance=self.distance_map.distance,
         )

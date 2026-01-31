@@ -39,15 +39,16 @@ package_manager.add_many(records)
 distances = CSVDistanceMap(DISTANCES_PATH)  # Load distance data from CSV
 policy = RoutingEligibilityPolicy()
 
-route_state_factory = RoutingStateFactory(distance_map=distances,
-                                          eligibility_policy=policy)
+route_state_factory = RoutingStateFactory(eligibility_policy=policy)
 strategy = DeadlineFirstSelectionStrategy()
 planner = NearestNeighborRoutePlanner()
 
 route_builder = RouteBuilder(
     route_state_factory=route_state_factory,
     selection_strategy=strategy,
-    planner_strategy=planner
+    planner_strategy=planner,
+    distance_map=distances,
+    max_packages=CAPACITY
 )
 
 event_log = EventLog()
