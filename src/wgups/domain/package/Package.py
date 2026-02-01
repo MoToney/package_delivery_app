@@ -1,10 +1,7 @@
 from enum import Enum
-from typing import List
 
 from wgups.domain.address.Address import Address
 from wgups.domain.package.PackageView import PackageView, to_view
-from wgups.simulation.events.Event import Event
-from wgups.simulation.events.EventType import EventType
 
 from datetime import datetime
 from typing import Optional
@@ -19,18 +16,16 @@ class PackageStatus(Enum):
     DELIVERED = 3
 
     def __str__(self):
-        if self.NOT_READY:
+        if self == PackageStatus.NOT_READY:
             return "Not Available"
-        elif self.AT_HUB:
+        elif self == PackageStatus.AT_HUB:
             return "At Hub"
-        elif self.EN_ROUTE:
+        elif self == PackageStatus.EN_ROUTE:
             return "En Route"
-        elif self.DELIVERED:
+        elif self == PackageStatus.DELIVERED:
             return "Delivered"
         else:
             return "Unknown Status"
-        # truck_id, address, note, etc.
-
 
 class Package:
     """
@@ -105,7 +100,6 @@ class Package:
         self.check_invariants()
         return True
 
-
     def check_invariants(self):
         """Verify class invariants hold"""
         assert self.package_id >= 0
@@ -140,8 +134,3 @@ class Package:
                 f"Address: {self.address} | "
                 f"Deadline: {self.deadline.strftime('%I:%M %p') if self.deadline else 'N/A'} | "
                 f"Weight: {self.weight} | ")
-
-
-"""package = Package(2, "2510 South Vernice Drive", "Copperas Cove", "76522", "Utah", deadline=datetime.now(), weight=3.0,
-                  note="",status=PackageStatus.NOT_READY)
-print(package)"""

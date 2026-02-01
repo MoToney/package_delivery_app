@@ -89,22 +89,22 @@ controller = RoutingController(
 # Controller handles ALL truck-related events
 dispatcher.subscribe(
     EventType.TRUCK_AVAILABLE,
-    controller.handle_truck_available,
+    controller.handle_truck_available
 )
 
 dispatcher.subscribe(
     EventType.TRUCK_ARRIVED_AT_STOP,
-    controller.handle_truck_arrived,  # NEW
+    controller.handle_truck_arrived
 )
 
 dispatcher.subscribe(
     EventType.PACKAGE_DELIVERED,
-    package_manager.handle_package_delivered,
+    package_manager.handle_package_delivered
 )
 
 dispatcher.subscribe(
     EventType.PACKAGE_LOADED,
-    package_manager.handle_package_loaded,
+    package_manager.handle_package_loaded
 )
 
 dispatcher.subscribe(
@@ -119,7 +119,7 @@ dispatcher.subscribe(
 
 dispatcher.subscribe(
     EventType.PACKAGE_AVAILABLE,
-    package_manager.handle_package_available,
+    package_manager.handle_package_available
 )
 
 # initial trigger: all trucks are available at time 8:00
@@ -138,12 +138,5 @@ clock.run(dispatcher, until=None)
 
 print('\n')
 query = QueryService(event_log)
-print(query.delivered_time(5))
-print(query.packages_delivered_by_truck(2))
-print(query.packages_delivered_by_truck(1))
-print(query.delivered_time(6))
-print(query.delivered_time(25))
-print(query.delivered_time(28))
-print(query.delivered_time(32))
 
-print(package_manager.package_repository[1].status)
+print(query.get_package_status_at_time(5, datetime(1900, 1, 1, 10, 20, 00), event_log.events()))

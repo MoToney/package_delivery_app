@@ -92,7 +92,7 @@ class PackageManager:
         assert event.time >= pkg.available_time
 
         pkg.set_status(PackageStatus.AT_HUB)
-        print(f"Package {pkg.package_id} now available as of: {event.time.time()} the status is now {pkg.status}")
+        print(f"Package {pkg.package_id} now available as of: {event.time.time()}")
 
     def get_package(self, package_id: int) -> Package:
         assert isinstance(package_id, int)
