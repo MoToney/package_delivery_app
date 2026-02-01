@@ -2,7 +2,8 @@ import heapq
 from datetime import datetime
 
 from wgups.simulation.events.Event import Event
-from wgups.simulation.events.EventLog import EventLog
+from wgups.simulation.events.EventData import EventData
+from wgups.simulation.queries.EventLog import EventLog
 from wgups.simulation.events.EventType import EventType
 
 
@@ -17,15 +18,18 @@ class Clock:
     def now(self) -> datetime:
         return self._now
 
-    def schedule(self, *, time: datetime, event_type: EventType, payload: dict):
-        if time < self._now:
+    def schedule(self, event_data: EventData):
+        if event_data.time < self._now:
             raise ValueError("Cannot schedule event in the past")
 
+        if isinstance(event_data, Event):
+            raise TypeError(event_data,"Event data must be of type EventData")
+
         event = Event(
-            time=time,
+            time=event_data.time,
             seq=self._seq,
-            type=event_type,
-            payload=payload,
+            type=event_data.event_type,
+            payload=event_data.payload,
         )
         self.event_log.append(event)
         self._seq += 1

@@ -10,5 +10,6 @@ class EventType(Enum):
     PACKAGE_LOADED = auto()
     PACKAGE_DELIVERED = auto()
     PACKAGE_ADDRESS_UPDATED = auto()
+    PACKAGE_AVAILABLE = auto()
 
     ROUTE_ASSIGNED = auto()

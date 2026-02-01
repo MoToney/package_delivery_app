@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
-from datetime import timedelta, datetime
+from datetime import datetime
 
 from wgups.domain.address.Address import Address
-from wgups.simulation.events.Event import Event
+from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventType import EventType
 from wgups.domain.route.Route import Route
 from wgups.domain.route import RouteStop
@@ -51,20 +51,13 @@ class SimulatedTruck:
         # Truck declares what just happened: packages were loaded
         for stop in route.stops:
             for pkg_id in stop.package_ids:
-                events.append({
-                    "time": now,
-                    "event_type": EventType.PACKAGE_LOADED,
-                    "payload": {
-                        "package_id": pkg_id,
-                        "truck_id": self.truck_id
-                    }
-                })
+                events.append(self.package_event_data(now, EventType.PACKAGE_LOADED, pkg_id))
 
         events.append(self.schedule_next_stop(now))
 
         return events
 
-    def handle_arrival(self, event: Event) -> list[dict]:
+    def handle_arrival(self, event: EventData) -> list[dict]:
         """Process arrival at stop, return events to be scheduled"""
         stop = self.next_stop()
 
@@ -76,15 +69,11 @@ class SimulatedTruck:
 
         # Delivery events
         for pkg_id in stop.package_ids:
-            events.append({
-                "time": event.time,
-                "event_type": EventType.PACKAGE_DELIVERED,
-                "payload": {
-                    "package_id": pkg_id,
-                    "truck_id": self.truck_id,
-                    "address": stop.address,
-                }
-            })
+            events.append(
+                self.package_event_data(event.time, EventType.PACKAGE_DELIVERED,
+                                        pkg_id, {"address": stop.address})
+            )
+
         self.advance_stop()
 
         evt = self.schedule_next_stop(event.time)
@@ -101,14 +90,10 @@ class SimulatedTruck:
             self.location = self.route.start_location
             self.route = None
             self.stop_index = None
-            events.append({
-                "time": event.time,
-                "event_type": EventType.TRUCK_AVAILABLE,
-                "payload": {"truck_id": self.truck_id}
-            })
+            events.append(self.truck_event_data(event.time, EventType.TRUCK_AVAILABLE))
             return events
 
-    def schedule_next_stop(self, departure_time: datetime) -> Optional[dict]:
+    def schedule_next_stop(self, departure_time: datetime) -> Optional[EventData]:
         """Schedule travel to next stop, return arrival event or None"""
         next_stop = self.next_stop()
         if not next_stop:
@@ -119,11 +104,30 @@ class SimulatedTruck:
 
         arrival_time = departure_time + self.truck.calculate_travel_time(distance)
 
-        return {
-            "time": arrival_time,
-            "event_type": EventType.TRUCK_ARRIVED_AT_STOP,
-            "payload": {"truck_id": self.truck_id}
-        }
+        return self.truck_event_data(arrival_time, EventType.TRUCK_ARRIVED_AT_STOP)
+
+    def package_event_data(self, time, event_type, package_id, extra_payload: Optional[dict] = None
+                           ) -> EventData:
+        payload = {"truck_id": self.truck_id, "package_id": package_id}
+        if extra_payload:
+            payload.update(extra_payload)
+
+        return EventData(
+            time=time,
+            event_type=event_type,
+            payload=payload,
+        )
+
+    def truck_event_data(self, time, event_type, extra_payload: Optional[dict] = None) -> EventData:
+        payload = {"truck_id": self.truck_id}
+        if extra_payload:
+            payload.update(extra_payload)
+
+        return EventData(
+            time=time,
+            event_type=event_type,
+            payload=payload,
+        )
 
     def next_stop(self) -> Optional[RouteStop]:
         if self.route is None:

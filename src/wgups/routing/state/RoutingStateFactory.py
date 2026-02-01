@@ -2,7 +2,7 @@ from datetime import datetime
 
 from wgups.application.PackageSnapshot import PackageSnapshot
 from wgups.infrastructure.distance.CSVDistanceMap import DistanceMap
-from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
+from wgups.routing.eligibility.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.routing.state.RoutingState import RoutingState
 
 

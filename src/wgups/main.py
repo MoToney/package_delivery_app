@@ -3,16 +3,17 @@ from config.load_config import load_config
 from wgups.application.PackageFactory import PackageFactory
 from wgups.application.PackageManager import PackageManager
 from wgups.domain.truck.Truck import Truck
-from wgups.infrastructure.distance.CSVDistanceMap import DistanceMap, CSVDistanceMap
+from wgups.infrastructure.distance.CSVDistanceMap import CSVDistanceMap
 from wgups.domain.address.Address import Address
 from wgups.infrastructure.IDGenerator import IDGenerator
 from wgups.infrastructure.CSVPackageSource import CSVPackageSource
 from wgups.routing.RouteBuilder import RouteBuilder
-from wgups.routing.policy.RoutingEligibilityPolicy import RoutingEligibilityPolicy
+from wgups.routing.eligibility.RoutingEligibilityPolicy import RoutingEligibilityPolicy
+from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventDispatcher import EventDispatcher
-from wgups.simulation.events.QueryService import EventQueries
+from wgups.simulation.queries.QueryService import QueryService
 from wgups.simulation.events.EventType import EventType
-from wgups.simulation.events.EventLog import EventLog
+from wgups.simulation.queries.EventLog import EventLog
 from wgups.simulation.orchestration.RoutingController import RoutingController
 from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
 from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
@@ -37,7 +38,7 @@ records = (CSVPackageSource().load_from_file(PACKAGES_PATH))
 id_generator = IDGenerator()
 p_factory = PackageFactory(id_generator)
 package_manager = PackageManager(p_factory)
-package_manager.add_many(records)
+package_events = package_manager.add_many(records)
 distances = CSVDistanceMap(DISTANCES_PATH)  # Load distance data from CSV
 policy = RoutingEligibilityPolicy()
 
@@ -59,18 +60,21 @@ dispatcher = EventDispatcher()
 # --- clock ---
 clock = Clock(start_time=START_TIME, event_log=event_log)
 
-clock.schedule(
+for event in package_events:
+
+    clock.schedule(event)
+
+clock.schedule(EventData(
     time=datetime(1900, 1, 1, 10, 20, 00),
     event_type=EventType.PACKAGE_ADDRESS_UPDATED,
     payload={
         "package_id": 9,
         "updated_address": Address("410 S State St", "Salt Lake City", "UT", "84111")
-    }
-)
+    }))
 
 # --- trucks ---
 trucks = [
-    SimulatedTruck(Truck(truck_id=1), location=HUB,),
+    SimulatedTruck(Truck(truck_id=1), location=HUB, ),
     SimulatedTruck(Truck(truck_id=2), location=HUB),
 ]
 
@@ -113,15 +117,33 @@ dispatcher.subscribe(
     controller.handle_package_address_corrected
 )
 
+dispatcher.subscribe(
+    EventType.PACKAGE_AVAILABLE,
+    package_manager.handle_package_available,
+)
+
 # initial trigger: all trucks are available at time 8:00
 for truck in trucks:
     clock.schedule(
-        time=START_TIME,
-        event_type=EventType.TRUCK_AVAILABLE,
-        payload={"truck_id": truck.truck_id}
+        EventData(
+            time=START_TIME,
+            event_type=EventType.TRUCK_AVAILABLE,
+            payload={"truck_id": truck.truck_id},
+
+        )
     )
 print("Starting WGUPS simulation")
 
 clock.run(dispatcher, until=None)
-query = EventQueries(event_log)
+
+print('\n')
+query = QueryService(event_log)
 print(query.delivered_time(5))
+print(query.packages_delivered_by_truck(2))
+print(query.packages_delivered_by_truck(1))
+print(query.delivered_time(6))
+print(query.delivered_time(25))
+print(query.delivered_time(28))
+print(query.delivered_time(32))
+
+print(package_manager.package_repository[1].status)

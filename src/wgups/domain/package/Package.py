@@ -99,6 +99,13 @@ class Package:
         self.check_invariants()
         return True
 
+    def mark_available(self):
+        self.status = PackageStatus.AT_HUB
+        self.available_time = None
+        self.check_invariants()
+        return True
+
+
     def check_invariants(self):
         """Verify class invariants hold"""
         assert self.package_id >= 0
@@ -117,20 +124,10 @@ class Package:
         self.check_invariants()
 
     def set_delivery_time(self, delivery_time: datetime) -> None:
-        """
-        Sets the delivery time of the package
-
-        :param delivery_time: the time the package was delivered
-        :type delivery_time: datetime
-
-        """
         self.delivery_time = delivery_time
         self.check_invariants()
 
     def set_departure_time(self, departure_time: datetime) -> None:
-        """
-        Sets the departure time of the package
-        """
         self.departure_time = departure_time
         self.check_invariants()
 

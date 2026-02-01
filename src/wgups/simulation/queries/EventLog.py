@@ -8,5 +8,6 @@ class EventLog:
     def append(self, event: Event) -> None:
         self._events.append(event)
 
-    def get_events(self) -> list[Event]:
+    def events(self) -> list[Event]:
         return list(self._events)
+
