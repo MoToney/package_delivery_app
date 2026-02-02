@@ -15,7 +15,11 @@ class PackageView:
     available_time: Optional[datetime]
     required_truck: Optional[int]
     wrong_address: bool
-    must_be_delivered_with: tuple[int, ...]  # immutable
+    must_be_delivered_with: tuple[int, ...]
+
+    truck_carrier: Optional[int] = None
+    delivery_time: Optional[datetime] = None
+    departure_time: Optional[datetime] = None
 
 def to_view(pkg: "Package") -> PackageView:
     return PackageView(
@@ -28,4 +32,7 @@ def to_view(pkg: "Package") -> PackageView:
         required_truck=pkg.required_truck,
         wrong_address=bool(pkg.wrong_address),
         must_be_delivered_with=tuple(sorted(pkg.must_be_delivered_with or ())),
+        truck_carrier=pkg.truck_carrier,
+        delivery_time=pkg.delivery_time,
+        departure_time=pkg.departure_time
     )

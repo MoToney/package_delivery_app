@@ -96,6 +96,9 @@ class PackageManager:
 
     def get_package(self, package_id: int) -> Package:
         assert isinstance(package_id, int)
-        pkg = self.package_repository[package_id]
+        pkg = self.package_repository.get(package_id)
         assert isinstance(pkg, Package)
         return pkg
+
+    def get_all_package_ids(self):
+        return self.package_repository.get_all_ids()

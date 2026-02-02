@@ -19,7 +19,7 @@ class RoutingController:
     def handle_truck_available(self, event_data: EventData):
         """Truck is available - give it work"""
         print(f"\nTruck {event_data.payload['truck_id']} at HUB at {event_data.time}")
-        truck = self.trucks[event_data.payload["truck_id"]]
+        truck = self.get_truck(event_data.payload["truck_id"])
 
         snapshot = self.state_provider.snapshot()
         route = self.route_builder.build_route(
@@ -45,7 +45,7 @@ class RoutingController:
 
     def handle_truck_arrived(self, event_data: EventData):
         """Truck arrived at a stop - process deliveries and next move"""
-        truck = self.trucks[event_data.payload["truck_id"]]
+        truck = self.get_truck(event_data.payload["truck_id"])
 
         # Truck processes arrival and returns events
         event = truck.handle_arrival(event_data)
@@ -65,3 +65,11 @@ class RoutingController:
         """Helper to schedule multiple events"""
         for evt_data in events_data:
             self.clock.schedule(evt_data)
+
+    def get_truck_speed(self, truck_id: int) -> float:
+        """Get speed for a specific truck"""
+        return self.get_truck(truck_id).truck.speed
+
+    def get_truck(self, truck_id: int) -> SimulatedTruck:
+        """Get truck by ID (if you need the whole object)"""
+        return self.trucks[truck_id]
