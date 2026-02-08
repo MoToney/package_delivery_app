@@ -16,18 +16,17 @@ class RouteBuilder:
             route_state_factory: RoutingStateFactory,
             selection_strategy: DeadlineFirstSelectionStrategy,
             planner_strategy: NearestNeighborRoutePlanner,
-            distance_map: DistanceMap,
-            max_packages: int = 16
+            distance_map: DistanceMap
     ):
 
         self.route_state_factory = route_state_factory
         self.selection_strategy = selection_strategy
         self.planner_strategy = planner_strategy
         self.distance_map = distance_map
-        self.max_packages = max_packages
+        self.max_packages = None
 
     def build_route(self, *, now: datetime, start: Address, truck_id: int,
-                    package_snapshot: PackageSnapshot, dispatched: set[int], return_to_start: bool=True
+                    package_snapshot: PackageSnapshot, dispatched: set[int], return_to_start: bool=True, max_packages: int=16
                     ) -> Route | None:
 
         state = self.route_state_factory.build_state(now=now,
@@ -37,7 +36,7 @@ class RouteBuilder:
 
         selected = self.selection_strategy.select(state,
                                                   truck_id=truck_id,
-                                                  max_route_length=self.max_packages,
+                                                  max_packages=max_packages,
                                                   )
 
         if not selected:

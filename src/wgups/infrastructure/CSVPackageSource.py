@@ -81,7 +81,7 @@ class CSVPackageSource:
             match = re.findall(r'\d+', note_str)
             grouped_packages = list(map(int, match))
         else:
-            grouped_packages = None
+            grouped_packages = []
 
         wrong_address = True if "wrong address" in note_str else False
 

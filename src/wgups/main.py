@@ -11,13 +11,14 @@ from wgups.routing.RouteBuilder import RouteBuilder
 from wgups.routing.eligibility.RoutingEligibilityPolicy import RoutingEligibilityPolicy
 from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventDispatcher import EventDispatcher
-from wgups.simulation.queries.QueryService import QueryService
+from wgups.simulation.queries.PackageQueryService import PackageQueryService
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.queries.EventLog import EventLog
 from wgups.simulation.orchestration.RoutingController import RoutingController
 from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
 from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
 from wgups.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
+from wgups.simulation.queries.TruckQueryService import TruckQueryService
 from wgups.simulation.time.Clock import Clock
 from pathlib import Path
 
@@ -51,7 +52,6 @@ route_builder = RouteBuilder(
     selection_strategy=strategy,
     planner_strategy=planner,
     distance_map=distances,
-    max_packages=CAPACITY
 )
 
 event_log = EventLog()
@@ -136,7 +136,22 @@ print("Starting WGUPS simulation")
 
 clock.run(dispatcher, until=None)
 
-print('\n')
-query = QueryService(event_log)
+"""print('\n')
+package_query = PackageQueryService(event_log, package_manager)
+truck_query = TruckQueryService(event_log, controller)
 
-print(query.get_package_status_at_time(5, datetime(1900, 1, 1, 10, 20, 00), event_log.events()))
+print(package_query.get_package_timeline(5))
+print(package_query.get_package_status(3, datetime(1900, 1, 1, 11, 20, 00)))
+print(package_query.get_package_status(3, datetime(1900, 1, 1, 12, 20, 00)))
+print(package_query.was_package_delivered_by(9, datetime(1900, 1, 1, 12, 20, 00)))
+print(package_query.get_delivery_time(12))
+
+
+print(truck_query.get_packages_on_truck(1, datetime(1900, 1, 1, 8, 00, 00)))
+print(truck_query.get_truck_status(2, datetime(1900, 1, 1, 9, 20, 00)))
+print(truck_query.is_truck_available(2, datetime(1900, 1, 1, 11, 20, 00)))
+print(truck_query.get_delivery_timeline(1, datetime(1900, 1, 1, 12, 20, 00)))
+print(truck_query.count_deliveries_made(1, datetime(1900, 1, 1, 12, 20, 00)))
+print(truck_query.count_deliveries_made(2, datetime(1900, 1, 1, 12, 20, 00)))
+print(truck_query.get_total_distance_traveled(2, datetime(1900, 1, 1, 12, 20, 00)))
+print(truck_query.get_average_speed(1, datetime(1900, 1, 1, 12, 20, 00)))"""

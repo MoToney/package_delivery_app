@@ -5,7 +5,7 @@ from wgups.routing.selection.RoutingCandidate import Candidate
 
 class DeadlineFirstSelectionStrategy:
     @staticmethod
-    def select(routing_state: RoutingState, truck_id, max_route_length) -> list[int]:
+    def select(routing_state: RoutingState, truck_id, max_packages) -> list[int]:
         selected = []
         used = set()
 
@@ -49,7 +49,7 @@ class DeadlineFirstSelectionStrategy:
         candidates.sort(key=score)
 
         for c in candidates:
-            if len(selected) + len(c.package_ids) > max_route_length:
+            if len(selected) + len(c.package_ids) > max_packages:
                 continue
             selected.extend(c.package_ids)
 

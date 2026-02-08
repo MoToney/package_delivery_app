@@ -28,6 +28,7 @@ class RoutingController:
             truck_id=truck.truck_id,
             package_snapshot=snapshot,
             dispatched=self.dispatched,
+            max_packages=truck.truck.capacity
         )
 
         if not route:

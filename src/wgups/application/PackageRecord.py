@@ -6,7 +6,7 @@ from wgups.domain.address.Address import Address
 from wgups.domain.constraints.Constraints import NoteConstraints
 
 
-@dataclass
+@dataclass(frozen=True)
 class PackageRecord:
     address: Address
     deadline: Optional[datetime]
