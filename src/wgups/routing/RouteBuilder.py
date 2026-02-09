@@ -4,6 +4,7 @@ from wgups.application.PackageSnapshot import PackageSnapshot
 from wgups.domain.address.Address import Address
 from wgups.domain.distance.DistanceMap import DistanceMap
 from wgups.domain.route.Route import Route
+from wgups.routing.eligibility import EligibilityPolicy
 from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
 from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
 from wgups.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
@@ -13,13 +14,12 @@ class RouteBuilder:
     def __init__(
             self,
             *,
-            route_state_factory: RoutingStateFactory,
+            eligibility_policy: EligibilityPolicy,
             selection_strategy: DeadlineFirstSelectionStrategy,
             planner_strategy: NearestNeighborRoutePlanner,
             distance_map: DistanceMap
     ):
-
-        self.route_state_factory = route_state_factory
+        self._eligibility_policy = eligibility_policy
         self.selection_strategy = selection_strategy
         self.planner_strategy = planner_strategy
         self.distance_map = distance_map
@@ -29,7 +29,7 @@ class RouteBuilder:
                     package_snapshot: PackageSnapshot, dispatched: set[int], return_to_start: bool=True, max_packages: int=16
                     ) -> Route | None:
 
-        state = self.route_state_factory.build_state(now=now,
+        state = RoutingStateFactory(self._eligibility_policy).build_state(now=now,
                                                      package_state=package_snapshot,
                                                      dispatched=dispatched,
                                                      )

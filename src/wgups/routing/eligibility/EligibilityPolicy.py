@@ -2,7 +2,7 @@ from wgups.domain.package.Package import PackageStatus
 from wgups.domain.package.PackageView import PackageView
 
 
-class RoutingEligibilityPolicy:
+class EligibilityPolicy:
     @staticmethod
     def is_eligible(pkg: PackageView, *, now, dispatched):
         if pkg.package_id in dispatched:

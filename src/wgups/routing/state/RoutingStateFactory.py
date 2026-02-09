@@ -2,12 +2,12 @@ from datetime import datetime
 
 from wgups.application.PackageSnapshot import PackageSnapshot
 from wgups.infrastructure.distance.CSVDistanceMap import DistanceMap
-from wgups.routing.eligibility.RoutingEligibilityPolicy import RoutingEligibilityPolicy
+from wgups.routing.eligibility.EligibilityPolicy import EligibilityPolicy
 from wgups.routing.state.RoutingState import RoutingState
 
 
 class RoutingStateFactory:
-    def __init__(self, eligibility_policy: RoutingEligibilityPolicy):
+    def __init__(self, eligibility_policy: EligibilityPolicy):
         self.policy = eligibility_policy
 
     def build_state(

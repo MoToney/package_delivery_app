@@ -9,11 +9,11 @@ from wgups.simulation.truck.SimulatedTruck import SimulatedTruck
 
 class RoutingController:
     def __init__(self, *, clock: Clock, trucks: list[SimulatedTruck], route_builder: RouteBuilder,
-                 package_state_provider: PackageManager):
+                 state_provider: PackageManager):
         self.clock = clock
         self.trucks = {t.truck_id: t for t in trucks}
         self.route_builder = route_builder
-        self.state_provider = package_state_provider
+        self.state_provider = state_provider
         self.dispatched: set[int] = set()
 
     def handle_truck_available(self, event_data: EventData):
