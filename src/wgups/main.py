@@ -1,15 +1,9 @@
-from datetime import datetime
 from pathlib import Path
 
-from wgups.DependencyContainer import DependencyContainer
-from wgups.UserInputHandler import UserInputHandler
-from wgups.WGUPSConfig import WGUPSConfig
-from wgups.domain.address.Address import Address
-from wgups.infrastructure.CSVPackageSource import CSVPackageSource
-from wgups.scenario.SimulationFactory import SimulationFactory
-from wgups.scenario.input.ScenarioBuilder import ScenarioBuilder
-from wgups.simulation.events.EventData import EventData
-from wgups.simulation.events.EventType import EventType
+from wgups.bootstrap.DependencyContainer import DependencyContainer
+from wgups.interface.UserInputHandler import UserInputHandler
+from wgups.bootstrap.WGUPSConfig import WGUPSConfig
+from wgups.simulation.engine.ScenarioBuilder import ScenarioBuilder
 
 CONFIG = WGUPSConfig(Path(__file__).resolve().parents[1])
 container = DependencyContainer(CONFIG)

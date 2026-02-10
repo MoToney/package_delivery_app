@@ -5,13 +5,12 @@ from wgups.domain.address.Address import Address
 from wgups.domain.truck.Truck import Truck
 from wgups.routing import RouteBuilder
 from wgups.application import PackageManager
-from wgups.scenario.ScenarioConfig import ScenarioConfig
-from wgups.scenario.Simulation import Simulation
+from wgups.simulation.engine.ScenarioConfig import ScenarioConfig
+from wgups.simulation.engine.Simulation import Simulation
 from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventDispatcher import EventDispatcher
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.orchestration.RoutingController import RoutingController
-from wgups.simulation.queries.EventLog import EventLog
 from wgups.simulation.time.Clock import Clock
 from wgups.simulation.truck.SimulatedTruck import SimulatedTruck
 

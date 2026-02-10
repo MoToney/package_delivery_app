@@ -1,4 +1,4 @@
-from wgups.scenario.input.ScenarioForm import ScenarioForm
+from wgups.simulation.engine.ScenarioForm import ScenarioForm
 
 
 class UserInputHandler:

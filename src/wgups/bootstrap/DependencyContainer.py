@@ -1,4 +1,4 @@
-from wgups.WGUPSConfig import WGUPSConfig
+from wgups.bootstrap.WGUPSConfig import WGUPSConfig
 from wgups.application.PackageFactory import PackageFactory
 from wgups.application.PackageManager import PackageManager
 from wgups.infrastructure.CSVPackageSource import CSVPackageSource
@@ -8,9 +8,8 @@ from wgups.routing.RouteBuilder import RouteBuilder
 from wgups.routing.eligibility.EligibilityPolicy import EligibilityPolicy
 from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
 from wgups.routing.selection.DeadlineFirstSelectionStrategy import DeadlineFirstSelectionStrategy
-from wgups.scenario.SimulationFactory import SimulationFactory
+from wgups.simulation.engine.SimulationFactory import SimulationFactory
 from wgups.simulation.events.EventData import EventData
-from wgups.simulation.events.EventDispatcher import EventDispatcher
 
 
 class DependencyContainer:

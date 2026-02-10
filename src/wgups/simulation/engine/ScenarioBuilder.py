@@ -1,8 +1,8 @@
 from datetime import datetime, time
 
 from wgups.domain.address.Address import Address
-from wgups.scenario.ScenarioConfig import ScenarioConfig
-from wgups.scenario.input.ScenarioForm import ScenarioForm
+from wgups.simulation.engine.ScenarioConfig import ScenarioConfig
+from wgups.simulation.engine.ScenarioForm import ScenarioForm
 
 
 class ScenarioBuilder:
