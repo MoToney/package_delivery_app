@@ -5,7 +5,7 @@ from wgups.domain.address.Address import Address
 
 
 @dataclass(frozen=True)
-class ScenarioConfig:
+class Scenario:
     start_time: datetime
     end_time: datetime
     hub: Address

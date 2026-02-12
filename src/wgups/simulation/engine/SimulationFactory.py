@@ -5,7 +5,7 @@ from wgups.domain.address.Address import Address
 from wgups.domain.truck.Truck import Truck
 from wgups.routing import RouteBuilder
 from wgups.application import PackageManager
-from wgups.simulation.engine.ScenarioConfig import ScenarioConfig
+from wgups.interface.Scenario import Scenario
 from wgups.simulation.engine.Simulation import Simulation
 from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventDispatcher import EventDispatcher
@@ -27,7 +27,7 @@ class SimulationFactory:
         self.package_manager = package_manager
         self.package_events = package_events
 
-    def build(self, scenario: ScenarioConfig) -> Simulation:
+    def build(self, scenario: Scenario) -> Simulation:
         clock = Clock(
             start_time=scenario.start_time,
         )

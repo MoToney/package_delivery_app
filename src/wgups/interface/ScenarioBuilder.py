@@ -1,13 +1,13 @@
 from datetime import datetime, time
 
 from wgups.domain.address.Address import Address
-from wgups.simulation.engine.ScenarioConfig import ScenarioConfig
-from wgups.simulation.engine.ScenarioForm import ScenarioForm
+from wgups.interface.Scenario import Scenario
+from wgups.interface.ScenarioForm import ScenarioForm
 
 
 class ScenarioBuilder:
     @staticmethod
-    def build_scenario(form: ScenarioForm) -> ScenarioConfig:
+    def build_scenario(form: ScenarioForm) -> Scenario:
         assert form.truck_count > 0
         assert form.truck_capacity > 0
 
@@ -25,7 +25,7 @@ class ScenarioBuilder:
             for i in range(form.truck_count)
         ]
 
-        return ScenarioConfig(
+        return Scenario(
             start_time=start,
             end_time=end,
             hub=Address(street_address="1 Start Way", city="Salt Lake City", state="UT", zip_code="12345"),

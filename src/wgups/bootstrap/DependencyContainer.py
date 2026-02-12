@@ -17,17 +17,9 @@ class DependencyContainer:
 
     def __init__(self, config: WGUPSConfig):
         self.config = config
-        self.package_manager = self._create_package_manager()
         self.distance_map = self._create_distance_map()
         self.route_builder = self._create_route_builder()
-        self.package_events = self._load_packages()
-        self.simulation_factory = self._create_simulation_factory()
 
-    def _create_package_manager(self) -> PackageManager:
-        """Initialize package manager with loaded packages."""
-        factory = PackageFactory(IDGenerator())
-        manager = PackageManager(factory)
-        return manager
 
     def _create_distance_map(self) -> CSVDistanceMap:
         """Load distance data from CSV."""
@@ -42,16 +34,17 @@ class DependencyContainer:
             distance_map=self.distance_map,
         )
 
-    def _load_packages(self) -> list[EventData]:
+    def create_simulation_factory(self) -> SimulationFactory:
+        factory = PackageFactory(IDGenerator())
+        manager = PackageManager(factory)
         records = CSVPackageSource().load_from_file(self.config.packages_path)
-        return self.package_manager.add_many(records)
 
+        package_events = manager.add_many(records)
 
-    def _create_simulation_factory(self) -> SimulationFactory:
         return SimulationFactory(
             route_builder=self.route_builder,
-            package_manager=self.package_manager,
-            package_events=self.package_events
+            package_manager=manager,
+            package_events=package_events
         )
 
 

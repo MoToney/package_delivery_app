@@ -3,21 +3,28 @@ from pathlib import Path
 from wgups.bootstrap.DependencyContainer import DependencyContainer
 from wgups.interface.UserInputHandler import UserInputHandler
 from wgups.bootstrap.WGUPSConfig import WGUPSConfig
-from wgups.simulation.engine.ScenarioBuilder import ScenarioBuilder
-
-CONFIG = WGUPSConfig(Path(__file__).resolve().parents[1])
-container = DependencyContainer(CONFIG)
-simulation_factory = container.simulation_factory
-
-form = UserInputHandler().get_scenario_parameters()
-scenario_config = ScenarioBuilder().build_scenario(form=form)
-
-simulation = simulation_factory.build(scenario_config)
+from wgups.interface.ScenarioBuilder import ScenarioBuilder
 
 
-print("\n\n Starting WGUPS simulation")
+def main():
 
-simulation.start()
+    CONFIG = WGUPSConfig(Path(__file__).resolve().parents[1])
+    container = DependencyContainer(CONFIG)
+    print("WGUPS System Ready \n \n ")
+
+    while True:
+        form = UserInputHandler().get_scenario_parameters()
+        if form is None:
+            break
+        scenario_config = ScenarioBuilder().build_scenario(form=form)
+        simulation_factory = container.create_simulation_factory()
+        simulation = simulation_factory.build(scenario_config)
+        print("\n\n Starting WGUPS simulation")
+        simulation.start()
+        if not UserInputHandler.run_again():
+            break
+
+
 
 """package_query = PackageQueryService(event_log, package_manager)
 truck_query = TruckQueryService(event_log, controller)
@@ -42,3 +49,6 @@ print(truck_query.get_total_active_time(1, datetime(1900, 1, 1, 22, 20, 00)))
 print(truck_query.get_total_distance_traveled(1, datetime(1900, 1, 1, 22, 20, 00)))
 print(truck_query.get_total_distance_traveled(2, datetime(1900, 1, 1, 22, 20, 00)))
 """
+
+while __name__ == "__main__":
+    main()
