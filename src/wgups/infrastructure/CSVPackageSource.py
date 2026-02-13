@@ -1,11 +1,10 @@
 import csv
 import re
-from datetime import datetime
 from typing import Optional, TextIO, Any
 
-from wgups.domain.address.Address import Address
-from wgups.domain.constraints.ConstraintsDTO import ConstraintsDTO
-from wgups.application.PackageRecord import PackageRecord
+from wgups.infrastructure.AddressDTO import AddressDTO
+from wgups.infrastructure.ConstraintsDTO import ConstraintsDTO
+from wgups.infrastructure.PackageRecord import PackageRecord
 from wgups.infrastructure.exceptions import InvalidInputError
 
 
@@ -36,7 +35,7 @@ class CSVPackageSource:
         reader = csv.DictReader(file_obj)
         for row in reader:
 
-            address = Address(row['Address'], row['City'], row['State'], row['Zip'])
+            address = AddressDTO(row['Address'], row['City'], row['State'], row['Zip'])
 
             try:
                 deadline = self._parse_deadline(row["Delivery"].strip())

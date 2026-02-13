@@ -9,6 +9,7 @@ from wgups.simulation.events.EventType import EventType
 
 class Clock:
     def __init__(self, start_time: Time):
+
         self._now = start_time
         self._queue: list[Event] = []
         self._seq = 0

@@ -2,11 +2,10 @@ from typing import List, Optional
 
 from wgups.application.PackageFactory import PackageFactory
 from wgups.application.PackageSnapshot import PackageSnapshot
-from wgups.domain.address.Address import Address
 from wgups.domain.address.AddressIndex import AddressIndex
 from wgups.domain.constraints.GroupIndex import GroupIndex
 from wgups.domain.package.Package import Package, PackageStatus
-from wgups.application.PackageRecord import PackageRecord
+from wgups.infrastructure.PackageRecord import PackageRecord
 
 from wgups.application.PackageRepository import PackageRepository
 from wgups.simulation.events.Event import Event

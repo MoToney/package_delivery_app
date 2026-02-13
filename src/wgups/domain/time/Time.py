@@ -1,5 +1,7 @@
 from datetime import time, datetime, timedelta
 
+from wgups.domain.time.Duration import Duration
+
 
 class Time:
     """Domain object representing a time of day, currently wrapping datetime.time."""
@@ -39,9 +41,6 @@ class Time:
         return cls(hour, minute)
 
 
-
-
-
     @property
     def hour(self) -> int:
         return self._time.hour
@@ -50,9 +49,9 @@ class Time:
     def minute(self) -> int:
         return self._time.minute
 
-    def add_minutes(self, minutes: float) -> "Time":
+    def add(self, duration: Duration) -> "Time":
         """Return a new Time object with added minutes, wraps around 24h."""
-        dt = datetime.combine(datetime.today(), self._time) + timedelta(minutes=minutes)
+        dt = datetime.combine(datetime.today(), self._time) + timedelta(minutes=duration.minutes)
         return Time(dt.hour, dt.minute)
 
     def difference_in_minutes(self, other: "Time") -> int:
@@ -60,6 +59,10 @@ class Time:
         dt_self = datetime.combine(datetime.today(), self._time)
         dt_other = datetime.combine(datetime.today(), other._time)
         return int((dt_self - dt_other).total_seconds() // 60)
+
+    def to_minutes_since_minutes(self):
+        hours_in_minutes = self.hour * 60
+        return hours_in_minutes + self.minute
 
     def __lt__(self, other: "Time") -> bool:
         return self._time < other._time

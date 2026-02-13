@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from wgups.src.infrastructure.CSVPackageSource import CSVPackageSource
-from wgups.application import PackageRecord
+from wgups.infrastructure import PackageRecord
 from wgups.src.domain.package.NoteConstraints import NoteConstraints
 from wgups.infrastructure.exceptions import InvalidInputError
 

@@ -1,5 +1,5 @@
 from wgups.domain.package.Package import PackageStatus
-from wgups.domain.package.PackageView import PackageView
+from wgups.application.PackageView import PackageView
 
 
 class EligibilityPolicy:

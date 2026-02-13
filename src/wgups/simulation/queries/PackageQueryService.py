@@ -1,12 +1,7 @@
-from dataclasses import dataclass
 from typing import Optional
 
-from wgups.application.PackageRepository import PackageRepository
-from wgups.domain.address.Address import Address
-from wgups.domain.package.Package import PackageStatus, Package
-from wgups.domain.package.PackageView import PackageView
+from wgups.domain.package.Package import PackageStatus
 from wgups.domain.time.Time import Time
-from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.queries.EventLog import EventLog
 

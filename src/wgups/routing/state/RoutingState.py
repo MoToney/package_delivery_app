@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from wgups.domain.package.PackageView import PackageView
+from wgups.application.PackageView import PackageView
 from wgups.domain.time.Time import Time
 
 

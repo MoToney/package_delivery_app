@@ -1,7 +1,7 @@
 from enum import Enum
 
 from wgups.domain.address.Address import Address
-from wgups.domain.package.PackageView import PackageView, to_view
+from wgups.application.PackageView import PackageView, to_view
 
 
 from typing import Optional

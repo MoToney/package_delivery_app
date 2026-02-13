@@ -101,7 +101,7 @@ class SimulatedTruck:
 
         distance = next_stop.distance_from_prev
 
-        arrival_time = departure_time.add_minutes(self.truck.calculate_travel_time(distance))
+        arrival_time = departure_time.add(self.truck.calculate_travel_time(distance))
 
         return self.truck_event_data(arrival_time, EventType.TRUCK_ARRIVED_AT_STOP)
 

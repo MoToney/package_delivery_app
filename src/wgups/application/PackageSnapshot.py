@@ -4,7 +4,7 @@ from types import MappingProxyType
 from typing import Mapping
 
 from wgups.domain.address.Address import Address
-from wgups.domain.package.PackageView import PackageView
+from wgups.application.PackageView import PackageView
 
 
 @dataclass(frozen=True)

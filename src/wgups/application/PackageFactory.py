@@ -1,7 +1,8 @@
+from wgups.domain.address.Address import Address
 from wgups.domain.package.Package import Package, PackageStatus
 from wgups.domain.time.Time import Time
 from wgups.infrastructure.IDGenerator import IDGenerator
-from wgups.application.PackageRecord import PackageRecord
+from wgups.infrastructure.PackageRecord import PackageRecord
 
 class PackageFactory:
     def __init__(self, id_generator: IDGenerator):
@@ -16,8 +17,11 @@ class PackageFactory:
         if package_record.deadline:
             deadline = Time.from_string_12hr(package_record.deadline)
 
+        address = Address(package_record.address.street_address, package_record.address.city, package_record.address.state,
+                          package_record.address.zip_code)
+
         package = Package(
-            package_id=package_id, address=package_record.address,deadline=deadline,
+            package_id=package_id, address=address,deadline=deadline,
             weight=package_record.weight,status=status)  # creates a package object
 
         if package_record.constraints.grouped_packages is not None:
@@ -37,16 +41,6 @@ class PackageFactory:
 
         return package
 
-    def _to_military(self, time_str: str) -> str:
-        # assumes validated "HH:MM AM/PM"
-        hour_min, period = time_str.split()
-        hour, minute = map(int, hour_min.split(":"))
 
-        if period == "PM" and hour != 12:
-            hour += 12
-        if period == "AM" and hour == 12:
-            hour = 0
-
-        return f"{hour:02d}:{minute:02d}"
 
 

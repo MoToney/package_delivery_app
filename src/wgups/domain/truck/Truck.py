@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+from wgups.domain.time.Duration import Duration
+
 
 class Truck:
     """
@@ -16,8 +18,7 @@ class Truck:
         """Business rule: can't exceed capacity"""
         return package_count <= self.capacity
 
-    def calculate_travel_time(self, distance: float) -> float:
+    def calculate_travel_time(self, distance: float) -> Duration:
         """Business rule: time = distance / speed"""
-        delta = timedelta(hours=distance / self.speed)
-        in_seconds = delta.total_seconds()
-        return in_seconds / 60
+        hours = distance / self.speed
+        return Duration(hours * 60)

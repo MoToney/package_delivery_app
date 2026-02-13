@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from wgups.domain.package.Package import Package
-from wgups.domain.package.PackageView import PackageView
+from wgups.application.PackageView import PackageView
 
 
 class PackageRepository:
