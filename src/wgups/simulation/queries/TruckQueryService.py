@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
+from wgups.domain.time.Time import Time
 from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.orchestration.RoutingController import RoutingController
@@ -12,12 +13,12 @@ class TruckQueryService:
     def __init__(self, log: EventLog, controller: RoutingController):
         self._event_store = log
         self._controller = controller
-        self._current_time: datetime = None
+        self._current_time: Time = None
 
-    def set_current_time(self, time: datetime):
+    def set_current_time(self, time: Time):
         self._current_time = time
 
-    def get_truck_status(self, truck_id: int, at_time: datetime) -> str:
+    def get_truck_status(self, truck_id: int, at_time: Time) -> str:
         events = self._get_truck_events(truck_id, at_time)
 
         if not events:
@@ -35,7 +36,7 @@ class TruckQueryService:
 
         return "AT_HUB"
 
-    def get_packages_on_truck(self, truck_id: int, at_time: datetime) -> list[int]:
+    def get_packages_on_truck(self, truck_id: int, at_time: Time) -> list[int]:
         all_events = self._event_store.get_all_events(at_time)
 
         packages_on_truck = set()
@@ -50,10 +51,10 @@ class TruckQueryService:
 
         return list(packages_on_truck)
 
-    def count_packages_on_truck(self, truck_id: int, at_time: datetime) -> int:
+    def count_packages_on_truck(self, truck_id: int, at_time: Time) -> int:
         return len(self.get_packages_on_truck(truck_id, at_time))
 
-    def get_deliveries_made(self, truck_id: int, at_time: datetime) -> list[int]:
+    def get_deliveries_made(self, truck_id: int, at_time: Time) -> list[int]:
         all_events = self._event_store.get_all_events(at_time)
 
         delivered = [
@@ -65,10 +66,10 @@ class TruckQueryService:
 
         return delivered
 
-    def count_deliveries_made(self, truck_id: int, at_time: datetime) -> int:
+    def count_deliveries_made(self, truck_id: int, at_time: Time) -> int:
         return len(self.get_deliveries_made(truck_id, at_time))
 
-    def get_delivery_timeline(self, truck_id: int, at_time: datetime) -> list[str]:
+    def get_delivery_timeline(self, truck_id: int, at_time: Time) -> list[str]:
         events = self._get_truck_events(truck_id, at_time)
         timeline = []
 
@@ -87,12 +88,12 @@ class TruckQueryService:
 
         return timeline
 
-    def get_total_delivery_time(self, truck_id: int, at_time: datetime) -> timedelta:
+    def get_total_delivery_time(self, truck_id: int, at_time: Time) -> timedelta:
         events = self._get_truck_events(truck_id, at_time)
 
         return events[-1].time - events[0].time
 
-    def get_total_waiting_time(self, truck_id: int, at_time: datetime) -> timedelta:
+    def get_total_waiting_time(self, truck_id: int, at_time: Time) -> timedelta:
         events = self._get_truck_events(truck_id, at_time)
         time_waiting = timedelta(0)
         for i in range(len(events)):
@@ -102,14 +103,14 @@ class TruckQueryService:
                     i += 1
         return time_waiting
 
-    def get_total_active_time(self, truck_id: int, at_time: datetime) -> timedelta:
+    def get_total_active_time(self, truck_id: int, at_time: Time) -> timedelta:
         return self.get_total_delivery_time(truck_id, at_time) - self.get_total_waiting_time(truck_id, at_time)
 
-    def get_total_packages_delivered_by_fleet(self, at_time: datetime) -> int:
+    def get_total_packages_delivered_by_fleet(self, at_time: Time) -> int:
         all_events = self._event_store.get_all_events(at_time)
         return sum(1 for e in all_events if e.type == EventType.PACKAGE_DELIVERED)
 
-    def _get_truck_events(self, truck_id: int, up_to_time: datetime) -> list[Event]:
+    def _get_truck_events(self, truck_id: int, up_to_time: Time) -> list[Event]:
         all_events = self._event_store.get_all_events(up_to_time)
 
         relevant = [
@@ -124,7 +125,7 @@ class TruckQueryService:
 
 
 
-    def get_total_distance_traveled(self, truck_id: int, at_time: datetime) -> float:
+    def get_total_distance_traveled(self, truck_id: int, at_time: Time) -> float:
         return self.get_total_active_time(truck_id, at_time).total_seconds() / 3600 * 16
 
     def get_average_speed(self, truck_id: int, at_time: datetime) -> Optional[float]:
@@ -141,7 +142,7 @@ class TruckQueryService:
 
         return total_distance / total_time
 
-    def get_actual_travel_time(self, truck_id: int, at_time: datetime) -> float:
+    def get_actual_travel_time(self, truck_id: int, at_time: Time) -> float:
         """
         Total time spent actually traveling (not waiting at stops) in hours.
         This is distance / speed.
@@ -154,7 +155,7 @@ class TruckQueryService:
 
         return total_distance / truck_speed
 
-    def get_fleet_total_distance(self, at_time: datetime) -> float:
+    def get_fleet_total_distance(self, at_time: Time) -> float:
         """
         Total distance traveled by entire fleet in miles.
         """

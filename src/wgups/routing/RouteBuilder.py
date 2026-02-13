@@ -1,9 +1,9 @@
 
-from datetime import datetime
 from wgups.application.PackageSnapshot import PackageSnapshot
 from wgups.domain.address.Address import Address
 from wgups.domain.distance.DistanceMap import DistanceMap
 from wgups.domain.route.Route import Route
+from wgups.domain.time.Time import Time
 from wgups.routing.eligibility import EligibilityPolicy
 from wgups.routing.state.RoutingStateFactory import RoutingStateFactory
 from wgups.routing.planning.NearestNeighborRoutePlanner import NearestNeighborRoutePlanner
@@ -25,7 +25,7 @@ class RouteBuilder:
         self.distance_map = distance_map
         self.max_packages = None
 
-    def build_route(self, *, now: datetime, start: Address, truck_id: int,
+    def build_route(self, *, now: Time, start: Address, truck_id: int,
                     package_snapshot: PackageSnapshot, dispatched: set[int], return_to_start: bool=True, max_packages: int=16
                     ) -> Route | None:
 

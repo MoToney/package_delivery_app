@@ -3,8 +3,11 @@ from enum import Enum
 from wgups.domain.address.Address import Address
 from wgups.domain.package.PackageView import PackageView, to_view
 
-from datetime import datetime
+
 from typing import Optional
+
+from wgups.domain.time.Time import Time
+
 
 class PackageStatus(Enum):
     """
@@ -34,21 +37,21 @@ class Package:
     Attributes:
         package_id (int): The unique identifier for the package
         address: The address of the package
-        deadline (datetime): The time the package must be delivered by
+        deadline (Time): The time the package must be delivered by
         weight (float): The weight of the package
         status (PackageStatus): The status of the package, which is a phase in the PackageStatus Enum
         must_be_delivered_with (list[int] or None): The ids of packages that must be delivered at the same time as the package
-        available_time (datetime or None): The time the package is available to be delivered
+        available_time (Time or None): The time the package is available to be delivered
         required_truck (int or None): The truck that is required to deliver the package
         wrong_address (bool): Whether the package has the wrong address
-        delivery_time (datetime or None): The time the package was delivered
-        departure_time (datetime or None): The time the package was loaded onto a truck and left the hub
+        delivery_time (Time or None): The time the package was delivered
+        departure_time (Time or None): The time the package was loaded onto a truck and left the hub
     """
 
     def __init__(self,
                  package_id: int = 0,
                  address: Optional[Address] = None,
-                 deadline: Optional[datetime] = None,
+                 deadline: Optional[Time] = None,
                  weight: Optional[float] = None,
                  status: PackageStatus = PackageStatus.NOT_READY
                  ):
@@ -60,17 +63,17 @@ class Package:
 
         self.must_be_delivered_with: Optional[
             list[int]] = None  # stores the ids of packages that must be delivered at the same time as the package
-        self.available_time: Optional[datetime] = None  # stores the time the package is available to be delivered
+        self.available_time: Optional[Time] = None  # stores the time the package is available to be delivered
         self.required_truck: Optional[int] = None  # stores the truck that is required to deliver the package, if any
         self.wrong_address: bool = False  # stores whether the package has the wrong address, default is False
 
         self.truck_carrier: Optional[int] = None
-        self.delivery_time: Optional[datetime] = None
-        self.departure_time: Optional[datetime] = None
+        self.delivery_time: Optional[Time] = None
+        self.departure_time: Optional[Time] = None
 
         self.check_invariants()
 
-    def load_onto_truck(self, *, truck_id: int, time: datetime):
+    def load_onto_truck(self, *, truck_id: int, time: Time):
         if self.status not in (PackageStatus.AT_HUB, PackageStatus.NOT_READY):
             return False
 
@@ -80,7 +83,7 @@ class Package:
         self.check_invariants()
         return True
 
-    def deliver(self, *, time: datetime):
+    def deliver(self, *, time: Time):
         self.status = PackageStatus.DELIVERED
         self.delivery_time = time
         self.truck_carrier = None
@@ -117,11 +120,11 @@ class Package:
         self.status = status
         self.check_invariants()
 
-    def set_delivery_time(self, delivery_time: datetime) -> None:
+    def set_delivery_time(self, delivery_time: Time) -> None:
         self.delivery_time = delivery_time
         self.check_invariants()
 
-    def set_departure_time(self, departure_time: datetime) -> None:
+    def set_departure_time(self, departure_time: Time) -> None:
         self.departure_time = departure_time
         self.check_invariants()
 

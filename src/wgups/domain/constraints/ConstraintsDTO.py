@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Optional
-
-from wgups.domain.time.Time import Time
 
 
 @dataclass
-class Constraints:
+class ConstraintsDTO:
     required_truck: Optional[int] = None
-    available_time: Optional[Time] = None
+    available_time: Optional[datetime] = None
     grouped_packages: list[int] = field(default_factory=list)
     wrong_address: bool = False

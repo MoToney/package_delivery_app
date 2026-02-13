@@ -1,6 +1,7 @@
 from datetime import datetime, time
 
 from wgups.domain.address.Address import Address
+from wgups.domain.time.Time import Time
 from wgups.interface.Scenario import Scenario
 from wgups.interface.ScenarioForm import ScenarioForm
 
@@ -26,8 +27,8 @@ class ScenarioBuilder:
         ]
 
         return Scenario(
-            start_time=start,
-            end_time=end,
+            start_time=Time.from_datetime(start),
+            end_time=Time.from_datetime(end),
             hub=Address(street_address="1 Start Way", city="Salt Lake City", state="UT", zip_code="12345"),
             trucks=trucks,
         )

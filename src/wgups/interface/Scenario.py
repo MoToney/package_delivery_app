@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 from wgups.domain.address.Address import Address
+from wgups.domain.time.Time import Time
 
 
 @dataclass(frozen=True)
 class Scenario:
-    start_time: datetime
-    end_time: datetime
+    start_time: Time
+    end_time: Time
     hub: Address
     trucks: list[dict]  # {id, capacity, speed}

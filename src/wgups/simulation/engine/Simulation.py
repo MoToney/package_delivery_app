@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from wgups.domain.time.Time import Time
 from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventDispatcher import EventDispatcher
 from wgups.simulation.events.EventType import EventType
@@ -13,7 +12,7 @@ class Simulation:
             *,
             clock: Clock,
             dispatcher: EventDispatcher,
-            end_time: datetime,
+            end_time: Time,
     ):
         self.clock = clock
         self.dispatcher = dispatcher

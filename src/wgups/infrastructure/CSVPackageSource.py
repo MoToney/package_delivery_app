@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, TextIO, Any
 
 from wgups.domain.address.Address import Address
-from wgups.domain.constraints.Constraints import NoteConstraints
+from wgups.domain.constraints.ConstraintsDTO import ConstraintsDTO
 from wgups.application.PackageRecord import PackageRecord
 from wgups.infrastructure.exceptions import InvalidInputError
 
@@ -64,7 +64,7 @@ class CSVPackageSource:
             return None
         return self._parse_time(deadline_str)
 
-    def _parse_note(self, note_str: str) -> NoteConstraints:
+    def _parse_note(self, note_str: str) -> ConstraintsDTO:
         if "truck" in note_str:
             match = re.search(r'truck\s*(\d+)', note_str)
             required_truck = int(match.group(1))
@@ -85,4 +85,4 @@ class CSVPackageSource:
 
         wrong_address = True if "wrong address" in note_str else False
 
-        return NoteConstraints(required_truck, available_time, grouped_packages, wrong_address)
+        return ConstraintsDTO(required_truck, available_time, grouped_packages, wrong_address)

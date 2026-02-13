@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 
 from wgups.application.PackageRepository import PackageRepository
 from wgups.domain.address.Address import Address
 from wgups.domain.package.Package import PackageStatus, Package
 from wgups.domain.package.PackageView import PackageView
+from wgups.domain.time.Time import Time
 from wgups.simulation.events.Event import Event
 from wgups.simulation.events.EventType import EventType
 from wgups.simulation.queries.EventLog import EventLog
@@ -20,11 +20,11 @@ class PackageQueryService:
     def __init__(self, log: EventLog, package_manager: 'PackageManager'):
         self._log = log
         self._package_manager = package_manager
-        self._current_time: Optional[datetime] = None
+        self._current_time: Optional[Time] = None
 
     # === Simple Queries - Just Read Events ===
 
-    def get_package_status(self, package_id: int, at_time: datetime) -> PackageStatus:
+    def get_package_status(self, package_id: int, at_time: Time) -> PackageStatus:
         """
         What's the status? Just find the last relevant event.
         No need to build a full PackageView!
@@ -45,7 +45,7 @@ class PackageQueryService:
 
         return PackageStatus.NOT_READY
 
-    def get_package_truck(self, package_id: int, at_time: datetime) -> Optional[int]:
+    def get_package_truck(self, package_id: int, at_time: Time) -> Optional[int]:
         """
         Which truck is it on? Just find the last LOADED/DELIVERED event.
         """
@@ -59,14 +59,14 @@ class PackageQueryService:
 
         return None  # Never loaded
 
-    def was_package_delivered_by(self, package_id: int, deadline: datetime) -> bool:
+    def was_package_delivered_by(self, package_id: int, deadline: Time) -> bool:
         """
         Did it make the deadline? Just check if DELIVERED event exists before deadline.
         """
         events = self._log.get_events_for_package(package_id, deadline)
         return any(e.type == EventType.PACKAGE_DELIVERED for e in events)
 
-    def get_delivery_time(self, package_id: int) -> Optional[datetime]:
+    def get_delivery_time(self, package_id: int) -> Optional[Time]:
         """
         When was it delivered? Find the DELIVERED event time.
         """

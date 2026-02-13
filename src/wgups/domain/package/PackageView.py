@@ -1,25 +1,25 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 
 from wgups.domain.address.Address import Address
+from wgups.domain.time.Time import Time
 
 
 @dataclass(frozen=True)
 class PackageView:
     package_id: int
     address: Address
-    deadline: Optional[datetime]
+    deadline: Optional[Time]
     weight: float
     status: "PackageStatus"
-    available_time: Optional[datetime]
+    available_time: Optional[Time]
     required_truck: Optional[int]
     wrong_address: bool
     must_be_delivered_with: tuple[int, ...]
 
     truck_carrier: Optional[int] = None
-    delivery_time: Optional[datetime] = None
-    departure_time: Optional[datetime] = None
+    delivery_time: Optional[Time] = None
+    departure_time: Optional[Time] = None
 
 def to_view(pkg: "Package") -> PackageView:
     return PackageView(

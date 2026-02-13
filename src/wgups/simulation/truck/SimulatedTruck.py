@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
-from datetime import datetime
 
 from wgups.domain.address.Address import Address
+from wgups.domain.time.Time import Time
 from wgups.simulation.events.EventData import EventData
 from wgups.simulation.events.EventType import EventType
 from wgups.domain.route.Route import Route
@@ -12,8 +12,8 @@ from wgups.domain.truck.Truck import Truck as DomainTruck
 
 @dataclass(frozen=True)
 class TruckMovement:
-    start_time: datetime
-    end_time: datetime
+    start_time: Time
+    end_time: Time
     distance: float
 
 
@@ -37,7 +37,7 @@ class SimulatedTruck:
         """Delegate to domain truck"""
         return self.truck.truck_id
 
-    def start_route(self, route: Route, now: datetime):
+    def start_route(self, route: Route, now: Time):
 
         total_packages = sum(len(stop.package_ids) for stop in route.stops)
         if not self.truck.can_load_packages(total_packages):
@@ -93,16 +93,15 @@ class SimulatedTruck:
             events.append(self.truck_event_data(event.time, EventType.TRUCK_AVAILABLE))
             return events
 
-    def schedule_next_stop(self, departure_time: datetime) -> Optional[EventData]:
+    def schedule_next_stop(self, departure_time: Time) -> Optional[EventData]:
         """Schedule travel to next stop, return arrival event or None"""
         next_stop = self.next_stop()
         if not next_stop:
             return None
 
         distance = next_stop.distance_from_prev
-        self.log_movement(departure_time, distance)
 
-        arrival_time = departure_time + self.truck.calculate_travel_time(distance)
+        arrival_time = departure_time.add_minutes(self.truck.calculate_travel_time(distance))
 
         return self.truck_event_data(arrival_time, EventType.TRUCK_ARRIVED_AT_STOP)
 
@@ -146,16 +145,6 @@ class SimulatedTruck:
             return
 
         self.stop_index += 1
-
-    def log_movement(self, start: datetime, distance: float):
-        duration = self.truck.calculate_travel_time(distance)
-        self.movements.append(
-            TruckMovement(
-                start_time=start,
-                end_time=start + duration,
-                distance=distance,
-            )
-        )
 
     def is_available(self):
         return self.route is None

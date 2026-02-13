@@ -70,21 +70,21 @@ class PackageManager:
         truck_id = event.payload["truck_id"]
         time = event.time
         pkg.load_onto_truck(truck_id=truck_id, time=time)
-        print(f"Package {pkg.package_id} loaded on Truck {event.payload['truck_id']} at: {event.time.time()}")
+        print(f"Package {pkg.package_id} loaded on Truck {event.payload['truck_id']} at: {event.time}")
 
     def handle_package_delivered(self, event: Event):
         pkg = self.get_package(event.payload["package_id"])
         assert event.type == EventType.PACKAGE_DELIVERED
         time = event.time
         pkg.deliver(time=time)
-        print(f"Package {pkg.package_id} delivered by Truck {event.payload['truck_id']} at: {event.time.time()}")
+        print(f"Package {pkg.package_id} delivered by Truck {event.payload['truck_id']} at: {event.time}")
 
     def handle_package_address_corrected(self, event: Event):
         pkg = self.get_package(event.payload["package_id"])
         assert event.type == EventType.PACKAGE_ADDRESS_UPDATED
         address = event.payload["updated_address"]
         pkg.update_address(address=address)
-        print(f"Package {pkg.package_id} address updated to {event.payload['updated_address']} at: {event.time.time()}")
+        print(f"Package {pkg.package_id} address updated to {event.payload['updated_address']} at: {event.time}")
 
     def handle_package_available(self, event: Event):
         pkg = self.get_package(event.payload["package_id"])
@@ -92,7 +92,7 @@ class PackageManager:
         assert event.time >= pkg.available_time
 
         pkg.set_status(PackageStatus.AT_HUB)
-        print(f"Package {pkg.package_id} now available as of: {event.time.time()}")
+        print(f"Package {pkg.package_id} now available as of: {event.time}")
 
     def get_package(self, package_id: int) -> Package:
         assert isinstance(package_id, int)

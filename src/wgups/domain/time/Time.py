@@ -28,7 +28,7 @@ class Time:
     def minute(self) -> int:
         return self._time.minute
 
-    def add_minutes(self, minutes: int) -> "Time":
+    def add_minutes(self, minutes: float) -> "Time":
         """Return a new Time object with added minutes, wraps around 24h."""
         dt = datetime.combine(datetime.today(), self._time) + timedelta(minutes=minutes)
         return Time(dt.hour, dt.minute)

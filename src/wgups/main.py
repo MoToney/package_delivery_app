@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from wgups.bootstrap.DependencyContainer import DependencyContainer
+from wgups.interface.ScenarioForm import ScenarioForm
 from wgups.interface.UserInputHandler import UserInputHandler
 from wgups.bootstrap.WGUPSConfig import WGUPSConfig
 from wgups.interface.ScenarioBuilder import ScenarioBuilder
@@ -13,7 +14,14 @@ def main():
     print("WGUPS System Ready \n \n ")
 
     while True:
-        form = UserInputHandler().get_scenario_parameters()
+        # form = UserInputHandler().get_scenario_parameters()
+        form = ScenarioForm(
+            truck_count=2,
+            truck_capacity=16,
+            start_time="08:00",
+            end_time="17:00",
+
+        )
         if form is None:
             break
         scenario_config = ScenarioBuilder().build_scenario(form=form)

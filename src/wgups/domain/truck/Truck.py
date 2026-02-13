@@ -16,6 +16,8 @@ class Truck:
         """Business rule: can't exceed capacity"""
         return package_count <= self.capacity
 
-    def calculate_travel_time(self, distance: float) -> timedelta:
+    def calculate_travel_time(self, distance: float) -> float:
         """Business rule: time = distance / speed"""
-        return timedelta(hours=distance / self.speed)
+        delta = timedelta(hours=distance / self.speed)
+        in_seconds = delta.total_seconds()
+        return in_seconds / 60

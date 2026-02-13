@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from wgups.domain.address.Address import Address
+from wgups.domain.time.Time import Time
 from wgups.domain.truck.Truck import Truck
 from wgups.routing import RouteBuilder
 from wgups.application import PackageManager
@@ -50,7 +51,7 @@ class SimulationFactory:
             clock.schedule(event_data)
 
         clock.schedule(EventData(
-            time=datetime(1900, 1, 1, 10, 20, 00),
+            time=Time.from_datetime(datetime(1900, 1, 1, 10, 20, 00)),
             event_type=EventType.PACKAGE_ADDRESS_UPDATED,
             payload={
                 "package_id": 9,

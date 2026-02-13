@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 from wgups.domain.package.PackageView import PackageView
+from wgups.domain.time.Time import Time
 
 
 @dataclass(frozen=True)
 class RoutingState:
-    now: datetime
+    now: Time
     # Read model
     packages: dict[int, PackageView]  # id -> Package (resolved state)
     groups: dict[int, frozenset[int]] # package_id -> group ids

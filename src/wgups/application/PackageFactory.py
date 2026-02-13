@@ -1,4 +1,5 @@
 from wgups.domain.package.Package import Package, PackageStatus
+from wgups.domain.time.Time import Time
 from wgups.infrastructure.IDGenerator import IDGenerator
 from wgups.application.PackageRecord import PackageRecord
 
@@ -11,15 +12,19 @@ class PackageFactory:
 
         status = PackageStatus.NOT_READY  # sets the status of the package to not ready
 
+        deadline = None
+        if package_record.deadline:
+            deadline = Time.from_datetime(package_record.deadline)
+
         package = Package(
-            package_id=package_id, address=package_record.address,deadline=package_record.deadline,
+            package_id=package_id, address=package_record.address,deadline=deadline,
             weight=package_record.weight,status=status)  # creates a package object
 
         if package_record.constraints.grouped_packages is not None:
             package.must_be_delivered_with = package_record.constraints.grouped_packages
 
         if package_record.constraints.available_time is not None:
-            package.available_time = package_record.constraints.available_time
+            package.available_time = Time.from_datetime(package_record.constraints.available_time)
         else:
             package.status = PackageStatus.AT_HUB
 

@@ -1,7 +1,7 @@
 from collections import defaultdict
-from datetime import datetime
 from typing import Dict, Optional, List, Iterable
 
+from wgups.domain.time.Time import Time
 from wgups.simulation.events.Event import Event
 
 
@@ -23,13 +23,13 @@ class EventLog:
             truck_id = event.payload["truck_id"]
             self._events_by_truck[truck_id].append(index)
 
-    def get_events_for_package(self, package_id: int, up_to_time: Optional[datetime] = None) -> List[Event]:
+    def get_events_for_package(self, package_id: int, up_to_time: Optional[Time] = None) -> List[Event]:
         return self._get_events_from_index(self._events_by_package, package_id, up_to_time)
 
-    def get_events_for_truck(self, truck_id: int, up_to_time: Optional[datetime] = None) -> List[Event]:
+    def get_events_for_truck(self, truck_id: int, up_to_time: Optional[Time] = None) -> List[Event]:
         return self._get_events_from_index(self._events_by_truck, truck_id, up_to_time)
 
-    def get_all_events(self, up_to_time: Optional[datetime] = None) -> List[Event]:
+    def get_all_events(self, up_to_time: Optional[Time] = None) -> List[Event]:
         """Get all events, optionally filtered by time"""
         events = self._events
         return self._filter_and_sort(events, up_to_time)
@@ -41,7 +41,7 @@ class EventLog:
             self,
             index: dict[int, list[int]],
             key: int,
-            up_to_time: Optional[datetime],
+            up_to_time: Optional[Time],
     ) -> list[Event]:
         if key not in index:
             return []
@@ -52,7 +52,7 @@ class EventLog:
     def _filter_and_sort(
             self,
             events: Iterable[Event],
-            up_to_time: Optional[datetime],
+            up_to_time: Optional[Time],
     ) -> list[Event]:
         if up_to_time:
             events = (e for e in events if e.time <= up_to_time)
