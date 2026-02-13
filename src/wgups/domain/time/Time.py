@@ -15,10 +15,32 @@ class Time:
         return cls(dt.hour, dt.minute)
 
     @classmethod
-    def from_string(cls, time_str: str) -> "Time":
+    def from_string_military(cls, time_str: str) -> "Time":
         """Create a Time from 'HH:MM' string."""
         hour, minute = map(int, time_str.split(":"))
+        assert 0 <= hour < 24
+        assert 0 <= minute < 60
+
+
         return cls(hour, minute)
+
+    @classmethod
+    def from_string_12hr(cls, time_str: str) -> "Time":
+        time, period = time_str.split()
+        period.upper().strip()
+        hour, minute = map(int, time.split(":"))
+        assert 0 < hour <= 12
+        assert 0 <= minute < 60
+        if period == "PM" and hour != 12:
+            hour += 12
+        if period == "AM" and hour == 12:
+            hour = 0
+
+        return cls(hour, minute)
+
+
+
+
 
     @property
     def hour(self) -> int:

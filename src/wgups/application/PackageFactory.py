@@ -14,7 +14,7 @@ class PackageFactory:
 
         deadline = None
         if package_record.deadline:
-            deadline = Time.from_datetime(package_record.deadline)
+            deadline = Time.from_string_12hr(package_record.deadline)
 
         package = Package(
             package_id=package_id, address=package_record.address,deadline=deadline,
@@ -24,7 +24,7 @@ class PackageFactory:
             package.must_be_delivered_with = package_record.constraints.grouped_packages
 
         if package_record.constraints.available_time is not None:
-            package.available_time = Time.from_datetime(package_record.constraints.available_time)
+            package.available_time = Time.from_string_12hr(package_record.constraints.available_time)
         else:
             package.status = PackageStatus.AT_HUB
 
@@ -36,4 +36,17 @@ class PackageFactory:
             package.status = PackageStatus.NOT_READY
 
         return package
+
+    def _to_military(self, time_str: str) -> str:
+        # assumes validated "HH:MM AM/PM"
+        hour_min, period = time_str.split()
+        hour, minute = map(int, hour_min.split(":"))
+
+        if period == "PM" and hour != 12:
+            hour += 12
+        if period == "AM" and hour == 12:
+            hour = 0
+
+        return f"{hour:02d}:{minute:02d}"
+
 

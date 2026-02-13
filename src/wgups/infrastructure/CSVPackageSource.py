@@ -10,6 +10,11 @@ from wgups.infrastructure.exceptions import InvalidInputError
 
 
 class CSVPackageSource:
+    def __init__(self):
+        self.TIME_PATTERN = re.compile(
+            r"^(1[0-2]|0?[1-9]):([0-5][0-9])\s?(AM|PM)$",
+            re.IGNORECASE
+        )
 
     def load_from_file(self, path: str) -> list[Any] | list[PackageRecord]:
         if not path:
@@ -53,14 +58,22 @@ class CSVPackageSource:
 
         return package_records
 
-    def _parse_time(self, deadline_str: str) -> Optional[datetime]:
-        """ Only accept properly formatted time or string 'EOD' which signifies no
-            specified deadline
-            """
-        return datetime.strptime(deadline_str.strip(), '%I:%M %p')
 
-    def _parse_deadline(self, deadline_str: str) -> Optional[datetime]:
-        if not deadline_str or deadline_str == 'EOD':
+    def _parse_time(self, deadline_str: str) -> str:
+        """
+        Validate and normalize time to 'HH:MM AM/PM' without using datetime.
+        """
+        cleaned = deadline_str.strip().upper()
+        match = self.TIME_PATTERN.match(cleaned)
+
+        if not match:
+            raise ValueError(f"Invalid time format: {deadline_str}")
+
+        hour, minute, period = match.groups()
+        return f"{int(hour):02d}:{minute} {period}"
+
+    def _parse_deadline(self, deadline_str: str) -> Optional[str]:
+        if not deadline_str or deadline_str.strip().upper() == "EOD":
             return None
         return self._parse_time(deadline_str)
 

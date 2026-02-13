@@ -10,6 +10,6 @@ from wgups.domain.time.Time import Time
 @dataclass(frozen=True)
 class PackageRecord:
     address: Address
-    deadline: Optional[datetime]
+    deadline: Optional[str]
     weight: float
     constraints: ConstraintsDTO
